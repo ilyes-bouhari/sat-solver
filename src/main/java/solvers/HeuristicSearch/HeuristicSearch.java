@@ -10,7 +10,7 @@ import tasks.AStarTask;
 
 public abstract class HeuristicSearch {
 
-    public static void AStar(ClausesSet clausesSet, ClausesPanel clausesPanel, int executionTimeInSeconds, LaunchPanel launchPanel, AStarTask task) {
+    public static Solution AStar(ClausesSet clausesSet, ClausesPanel clausesPanel, int executionTimeInSeconds, LaunchPanel launchPanel, AStarTask task) {
 
         ArrayList<Node> nodes = generateNodes(clausesSet);
         nodes.sort(Collections.reverseOrder());
@@ -25,7 +25,7 @@ public abstract class HeuristicSearch {
 
         while (!open.isEmpty()) {
 
-            if (((System.currentTimeMillis() - startTime)/1000) >= executionTimeInSeconds || task.isCancelled() || task.isDone())
+            if (((System.currentTimeMillis() - startTime)/1000) >= executionTimeInSeconds || (task != null && (task.isCancelled() || task.isDone())))
                 break;
 
             Node currentNode = open.remove(0);
@@ -36,9 +36,9 @@ public abstract class HeuristicSearch {
             if(solution.satisfiedClausesCount(clausesSet, null) > bestSolution.satisfiedClausesCount(clausesSet, null))
                 bestSolution = new Solution(solution);
 
-            launchPanel.getSummaryPanel().updateSummary(clausesSet, bestSolution);
+            if (launchPanel != null) launchPanel.getSummaryPanel().updateSummary(clausesSet, bestSolution);
 
-            boolean response = bestSolution.isSolution(clausesSet, clausesPanel.getTableModel());
+            boolean response = bestSolution.isSolution(clausesSet, clausesPanel != null ? clausesPanel.getTableModel() : null);
             if (response) break;
 
             if (currentNode.getChildren().size() > 0) {
@@ -61,6 +61,8 @@ public abstract class HeuristicSearch {
                 Collections.sort(open, Collections.reverseOrder());
             }
         }
+
+        return bestSolution;
     }
 
     public static ArrayList<Node> generateNodes(ClausesSet clausesSet) {

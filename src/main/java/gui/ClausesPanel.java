@@ -7,6 +7,7 @@ import utils.CustomTableCellRenderer;
 import java.awt.*;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
+import java.util.Objects;
 import java.util.stream.IntStream;
 import java.awt.event.ActionListener;
 import javax.swing.border.Border;
@@ -127,7 +128,7 @@ public class ClausesPanel extends JPanel {
                 String filePath = "/" + benchmarkType + "/" + benchmarkType.split("-")[0] + "-" + String.format("%0" + (benchmarkInstance.length()+1) + "d", Integer.parseInt(benchmarkInstance)) + ".cnf";
 
                 try {
-                    loadClausesSet(getClass().getResource(filePath).getPath());
+                    loadClausesSet(Objects.requireNonNull(getClass().getResource(filePath)).getPath());
                     launchPanel.setClausesLoaded(true);
                     launchPanel.enableLaunchButton();
                 } catch (NullPointerException ignore) {}

@@ -27,7 +27,7 @@ public abstract class BlindSearch {
         int counter = 1;
         do {
 
-            if (((System.currentTimeMillis() - startTime)/1000) >= executionTimeInSeconds || task.isCancelled() || task.isDone())
+            if (((System.currentTimeMillis() - startTime)/1000) >= executionTimeInSeconds || (task != null && (task.isCancelled() || task.isDone())))
                 break;
 
             int temp = counter;
@@ -53,10 +53,10 @@ public abstract class BlindSearch {
             if(solution.satisfiedClausesCount(clausesSet, null) > bestSolution.satisfiedClausesCount(clausesSet, null))
                 bestSolution = new BaseSolution(solution);
 
-            launchPanel.getSummaryPanel().updateSummary(clausesSet, bestSolution);
-            // solutionPanel.setSolution(bestSolution);
+            if (launchPanel != null) launchPanel.getSummaryPanel().updateSummary(clausesSet, bestSolution);
+            // if (solutionPanel != null) solutionPanel.setSolution(bestSolution);
 
-            boolean response = bestSolution.isSolution(clausesSet, clausesPanel.getTableModel());
+            boolean response = bestSolution.isSolution(clausesSet, clausesPanel != null ? clausesPanel.getTableModel() : null);
             if (response) break;
 
             counter = temp;
