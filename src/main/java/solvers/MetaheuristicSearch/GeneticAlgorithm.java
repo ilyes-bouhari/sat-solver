@@ -2,6 +2,8 @@ package solvers.MetaheuristicSearch;
 
 import common.ClausesSet;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
@@ -79,7 +81,7 @@ public class GeneticAlgorithm {
             fitnessBasedInsertion();
 
             System.out.println(bestIndividual.getFitness());
-        } while (stoppingCriteria(2));
+        } while (stoppingCriteria(1));
 
         return bestIndividual.getSolution();
     }
@@ -237,6 +239,9 @@ public class GeneticAlgorithm {
 
         GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm(clausesSet, 1000, 100, 50, 5, 10);
 
-        System.out.println(geneticAlgorithm.process());
+        Instant start = Instant.now();
+        geneticAlgorithm.process();
+        Instant finish = Instant.now();
+        System.out.println((float) Duration.between(start, finish).toMillis() / 1000);
     }
 }
