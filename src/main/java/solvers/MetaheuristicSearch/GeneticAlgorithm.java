@@ -12,7 +12,12 @@ public class GeneticAlgorithm {
     private ClausesSet clausesSet;
     private ArrayList<Individual> population;
     private Individual firstParent, secondParent, firstChild, secondChild, bestIndividual;
-    private final int populationSize, maxIterations, crossoverRate, mutationRate, executionTimeInSeconds;
+    private final int populationSize;
+    private final int maxIterations;
+    private int iteration = 0;
+    private final int crossoverRate;
+    private final int mutationRate;
+    private final int executionTimeInSeconds;
     private final Random random = new Random();
 
     public GeneticAlgorithm(ClausesSet clausesSet, int populationSize, int maxIterations, int crossoverRate, int mutationRate, int executionTimeInSeconds) {
@@ -33,7 +38,6 @@ public class GeneticAlgorithm {
 
         long startTime = System.currentTimeMillis();
 
-        int iteration = 0;
         do {
             iteration++;
 
@@ -75,9 +79,25 @@ public class GeneticAlgorithm {
             fitnessBasedInsertion();
 
             System.out.println(bestIndividual.getFitness());
-        } while (bestIndividual.getFitness() < 325);
+        } while (stoppingCriteria(2));
 
         return bestIndividual.getSolution();
+    }
+
+    public boolean stoppingCriteria(int choice) {
+
+        boolean criteria = true;
+
+        switch (choice) {
+            case 1:
+                criteria = bestIndividual.getFitness() < clausesSet.getNumberOfClause();
+                break;
+            case 2:
+                criteria = iteration < maxIterations;
+                break;
+        }
+
+        return criteria;
     }
 
     public ArrayList<Individual> generatePopulation(ClausesSet clausesSet, int populationSize) {
@@ -215,7 +235,7 @@ public class GeneticAlgorithm {
 
         ClausesSet clausesSet = new ClausesSet(file);
 
-        GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm(clausesSet, 50, 6000, 50, 5, 10);
+        GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm(clausesSet, 1000, 100, 50, 5, 10);
 
         System.out.println(geneticAlgorithm.process());
     }
