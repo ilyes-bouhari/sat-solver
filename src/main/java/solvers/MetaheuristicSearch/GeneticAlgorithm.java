@@ -150,6 +150,7 @@ public class GeneticAlgorithm {
     public Individual rouletteWheel() {
 
         Individual value = null;
+        population.sort(Collections.reverseOrder());
         int max = population.stream().mapToInt(Individual::getFitness).sum();
         int pick = ThreadLocalRandom.current().nextInt(0, max);
 
@@ -237,7 +238,7 @@ public class GeneticAlgorithm {
 
         ClausesSet clausesSet = new ClausesSet(file);
 
-        GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm(clausesSet, 1000, 100, 50, 5, 10);
+        GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm(clausesSet, 50, 100, 50, 5, 10);
 
         Instant start = Instant.now();
         geneticAlgorithm.process();

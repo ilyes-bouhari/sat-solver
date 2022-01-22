@@ -2,6 +2,7 @@ package gui;
 
 import common.ClausesSet;
 import common.BaseSolution;
+import solvers.MetaheuristicSearch.Solution;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -50,8 +51,8 @@ public class SummaryPanel extends JPanel {
         add(nonSatisfiedClauses, gridBagConstraints);
     }
 
-    public void updateSummary(ClausesSet clausesSet, BaseSolution solution) {
-        float count = solution.satisfiedClausesCount(clausesSet, null);
+    public void updateSummary(ClausesSet clausesSet, Solution solution) {
+        float count = solution.satisfiedClauses(clausesSet, null);
         satisfiedClauses.setText((int) count + " clauses = " + Math.round(count*100/clausesSet.getNumberOfClause()) + "%");
 
         count = clausesSet.getNumberOfClause() - count;

@@ -26,7 +26,7 @@ public class Main extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds((int) screenSize.getWidth() / 4, (int) screenSize.getHeight() / 4, 700, 550);
+        setBounds((int) screenSize.getWidth() / 4, (int) screenSize.getHeight() / 4, 700, 650);
         setResizable(false);
 
         // Content Panel

@@ -7,6 +7,8 @@ import com.opencsv.CSVWriter;
 import solvers.BlindSearch.BlindSearch;
 import solvers.HeuristicSearch.HeuristicSearch;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 import java.io.File;
 import java.io.FileWriter;
@@ -68,28 +70,34 @@ public class GenerateResults {
         int executionTimeInSeconds = 1;
         BaseSolution solution = null;
 
+        // TODO : add execution time
+        /*Instant start = Instant.now();
+        // solver goes here !
+        Instant finish = Instant.now();
+        System.out.println((float) Duration.between(start, finish).toMillis() / 1000);*/
+        
         switch (solver) {
             case DFS:
 
-                solution = BlindSearch.DepthFirstSearch(
+                /*solution = BlindSearch.DepthFirstSearch(
                     clausesPanel.getClausesSet(),
                     null,
                     null,
                     executionTimeInSeconds,
                     null,
                     null
-                );
+                );*/
 
                 break;
             case AStar:
 
-                solution = HeuristicSearch.AStar(
+                /*solution = HeuristicSearch.AStar(
                     clausesPanel.getClausesSet(),
                     null,
                     executionTimeInSeconds,
                     null,
                     null
-                );
+                );*/
 
                 break;
         }

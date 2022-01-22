@@ -36,7 +36,7 @@ public abstract class HeuristicSearch {
             if(solution.satisfiedClausesCount(clausesSet, null) > bestSolution.satisfiedClausesCount(clausesSet, null))
                 bestSolution = new Solution(solution);
 
-            if (launchPanel != null) launchPanel.getSummaryPanel().updateSummary(clausesSet, bestSolution);
+            // if (launchPanel != null) launchPanel.getSummaryPanel().updateSummary(clausesSet, bestSolution);
 
             boolean response = bestSolution.isSolution(clausesSet, clausesPanel != null ? clausesPanel.getTableModel() : null);
             if (response) break;

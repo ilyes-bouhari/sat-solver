@@ -27,7 +27,8 @@ public class DepthFirstSearchTask extends SwingWorker<Object, Void> {
     @Override
     protected Object doInBackground() throws Exception {
 
-        BlindSearch.DepthFirstSearch(clausesSet, clausesPanel, solutionPanel, executionTimeInSeconds, launchPanel, this);
+        BlindSearch blindSearch = new BlindSearch(clausesSet, clausesPanel, solutionPanel, executionTimeInSeconds, launchPanel, this);
+        blindSearch.DepthFirstSearch();
 
         return null;
     }

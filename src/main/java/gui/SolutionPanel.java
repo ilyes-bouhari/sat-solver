@@ -1,6 +1,7 @@
 package gui;
 
 import common.BaseSolution;
+import solvers.MetaheuristicSearch.Solution;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -13,7 +14,7 @@ import java.awt.*;
 
 public class SolutionPanel extends JPanel {
 
-    JLabel solutionLabel;
+    JTextArea solutionLabel;
 
     public SolutionPanel() {
 
@@ -21,23 +22,26 @@ public class SolutionPanel extends JPanel {
     }
 
     public void setUI() {
-        /*setLayout(new GridBagLayout());
+        setLayout(new GridBagLayout());
         Border border = BorderFactory.createTitledBorder("Solution");
         Border margin = new EmptyBorder(8, 8, 8, 8);
         setBorder(new CompoundBorder(border, margin));
 
         GridBagConstraints gridBagConstraints = new GridBagConstraints();
 
-        solutionLabel = new JLabel("N/A");
+        solutionLabel = new JTextArea("N/A");
+        solutionLabel.setLineWrap(true);
+        solutionLabel.setBackground(new Color(238, 238, 238));
+        solutionLabel.setFont(new Font("Sans Serif", Font.BOLD, 14));
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.gridwidth = 2;
         gridBagConstraints.weightx = 1;
         gridBagConstraints.fill = GridBagConstraints.BOTH;
-        add(solutionLabel, gridBagConstraints);*/
+        add(solutionLabel, gridBagConstraints);
     }
 
-    public void setSolution(BaseSolution solution) {
-        /*solutionLabel.setText(solution.toString());*/
+    public void setSolution(Solution solution) {
+        solutionLabel.setText(solution.toString());
     }
 }

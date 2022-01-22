@@ -3,6 +3,7 @@ package solvers.MetaheuristicSearch;
 import common.Clause;
 import common.ClausesSet;
 
+import javax.swing.table.DefaultTableModel;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Random;
@@ -47,7 +48,7 @@ public class Solution {
         this.solution.set(position, -this.solution.get(position));
     }
 
-    public int satisfiedClauses(ClausesSet clausesSet) {
+    public int satisfiedClauses(ClausesSet clausesSet, DefaultTableModel tableModel) {
 
         int count = 0;
         int literal = 0;
@@ -59,13 +60,20 @@ public class Solution {
                 literal = clause.getLiteral(j);
 
                 if (literal == getLiteral(Math.abs(literal) - 1)) {
+                    if (tableModel != null) tableModel.setValueAt(1, i, 0);
                     count++;
                     break;
                 }
+
+                if ((j == clause.getNumberOfLiterals()-1) && tableModel != null) tableModel.setValueAt(0, i, 0);
             }
         }
 
         return count;
+    }
+
+    public boolean isSolution(ClausesSet clausesSet, DefaultTableModel tableModel) {
+        return clausesSet.getNumberOfClause() == satisfiedClauses(clausesSet, tableModel);
     }
 
     @Override
