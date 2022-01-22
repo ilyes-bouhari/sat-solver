@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class Node extends BaseNode implements Comparable<Node>{
+public class Node extends BaseNode implements Comparable<Node> {
 
     private int heuristic;
     private int cost;

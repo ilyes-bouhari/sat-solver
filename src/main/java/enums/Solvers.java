@@ -2,5 +2,6 @@ package enums;
 
 public enum Solvers {
     DFS,
-    AStar
+    AStar,
+    AG,
 }

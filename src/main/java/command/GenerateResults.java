@@ -17,10 +17,14 @@ import java.nio.file.Paths;
 
 public class GenerateResults {
 
+    private static String[] solversResultsPerFileHeaders = {"filename", "satisfied"};
+    private static String[] solversResultsAverageHeaders = {"solver", "value"};
+
     public static void main(String[] args) throws IOException {
 
         String[] directories = {"/uf75-325", "/uuf75-325"};
-        Solvers[] solvers = {Solvers.AStar, Solvers.DFS};
+        Solvers[] solvers = {Solvers.AStar, Solvers.DFS, Solvers.AG};
+        ArrayDeque<String[]> solversAverageResults = new ArrayDeque<>();
 
         Arrays.stream(solvers).forEach(solver -> {
             ArrayDeque<String[]> records = new ArrayDeque<>();
@@ -45,8 +49,15 @@ public class GenerateResults {
                 }
             });
 
-            createResultsCSVFile(records, solver);
+            // solver average result
+            int sum = records.stream().mapToInt(record -> Integer.parseInt(record[1])).sum();
+            solversAverageResults.addLast(new String[] {String.valueOf(solver), String.valueOf(sum/records.size())});
+
+            // solver result for each file
+            createResultsCSVFile(solversResultsPerFileHeaders, records, (solver + ".csv"));
         });
+
+        createResultsCSVFile(solversResultsAverageHeaders, solversAverageResults, "average.csv");
     }
 
     public static int satisfiedClausesCount(File file, Solvers solver) {
@@ -86,12 +97,11 @@ public class GenerateResults {
         return solution.satisfiedClausesCount(clausesPanel.getClausesSet(), null);
     }
 
-    public static void createResultsCSVFile(ArrayDeque<String[]> records, Solvers solver) {
-        String[] headers = {"filename", "satisfied"};
+    public static void createResultsCSVFile(String[] headers, ArrayDeque<String[]> records, String filename) {
 
         records.addFirst(headers);
 
-        String filePath = "/exports/" + solver + ".csv";
+        String filePath = "/exports/" + filename;
 
         try (
             CSVWriter writer = new CSVWriter(
