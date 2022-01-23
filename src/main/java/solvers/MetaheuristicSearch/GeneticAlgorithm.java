@@ -1,6 +1,7 @@
 package solvers.MetaheuristicSearch;
 
 import common.ClausesSet;
+import common.Solution;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -20,15 +21,17 @@ public class GeneticAlgorithm {
     private final int crossoverRate;
     private final int mutationRate;
     private final int executionTimeInSeconds;
+    private final int stoppingCriteria;
     private final Random random = new Random();
 
-    public GeneticAlgorithm(ClausesSet clausesSet, int populationSize, int maxIterations, int crossoverRate, int mutationRate, int executionTimeInSeconds) {
+    public GeneticAlgorithm(ClausesSet clausesSet, int populationSize, int maxIterations, int crossoverRate, int mutationRate, int executionTimeInSeconds, int stoppingCriteria) {
         this.clausesSet = clausesSet;
         this.populationSize = populationSize;
         this.maxIterations = maxIterations;
         this.crossoverRate = crossoverRate;
         this.mutationRate = mutationRate;
         this.executionTimeInSeconds = executionTimeInSeconds;
+        this.stoppingCriteria = stoppingCriteria;
     }
 
     public Solution process() {
@@ -43,8 +46,8 @@ public class GeneticAlgorithm {
         do {
             iteration++;
 
-            /*if (((System.currentTimeMillis() - startTime)/1000) >= executionTimeInSeconds)
-                break;*/
+            if ((((System.currentTimeMillis() - startTime)/1000) >= executionTimeInSeconds) && stoppingCriteria == 0)
+                break;
 
             /**
              * Selection
@@ -80,26 +83,19 @@ public class GeneticAlgorithm {
              */
             fitnessBasedInsertion();
 
-            System.out.println(bestIndividual.getFitness());
-        } while (stoppingCriteria(1));
+            // System.out.println(bestIndividual.getFitness());
+        } while (stoppingCriteria(stoppingCriteria));
 
         return bestIndividual.getSolution();
     }
 
     public boolean stoppingCriteria(int choice) {
 
-        boolean criteria = true;
-
-        switch (choice) {
-            case 1:
-                criteria = bestIndividual.getFitness() < clausesSet.getNumberOfClause();
-                break;
-            case 2:
-                criteria = iteration < maxIterations;
-                break;
-        }
-
-        return criteria;
+        return switch (choice) {
+            case 1 -> bestIndividual.getFitness() < clausesSet.getNumberOfClause();
+            case 2 -> iteration < maxIterations;
+            default -> true;
+        };
     }
 
     public ArrayList<Individual> generatePopulation(ClausesSet clausesSet, int populationSize) {
@@ -238,7 +234,7 @@ public class GeneticAlgorithm {
 
         ClausesSet clausesSet = new ClausesSet(file);
 
-        GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm(clausesSet, 50, 100, 50, 5, 10);
+        GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm(clausesSet, 50, 100, 50, 5, 10, 1);
 
         Instant start = Instant.now();
         geneticAlgorithm.process();

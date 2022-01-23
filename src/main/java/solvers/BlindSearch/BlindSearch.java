@@ -1,10 +1,10 @@
 package solvers.BlindSearch;
 
+import common.Solution;
 import gui.LaunchPanel;
 import gui.ClausesPanel;
 import common.ClausesSet;
 import gui.SolutionPanel;
-import solvers.MetaheuristicSearch.Solution;
 import tasks.DepthFirstSearchTask;
 
 import java.util.ArrayList;

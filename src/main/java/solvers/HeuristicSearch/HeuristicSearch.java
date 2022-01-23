@@ -4,6 +4,7 @@ import java.util.*;
 
 import common.Clause;
 import common.ClausesSet;
+import common.Solution;
 import gui.ClausesPanel;
 import gui.LaunchPanel;
 import gui.SolutionPanel;
@@ -78,8 +79,6 @@ public class HeuristicSearch {
 
                 open.sort(Collections.reverseOrder());
             }
-
-            System.out.println(bestSolution.satisfiedClauses(clausesSet, null));
         }
 
         return bestSolution;

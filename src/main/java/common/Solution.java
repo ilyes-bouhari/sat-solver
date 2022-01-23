@@ -1,12 +1,7 @@
-package solvers.MetaheuristicSearch;
-
-import common.Clause;
-import common.ClausesSet;
+package common;
 
 import javax.swing.table.DefaultTableModel;
 import java.util.ArrayList;
-import java.util.Objects;
-import java.util.Random;
 
 public class Solution {
     public ArrayList<Integer> solution = new ArrayList<>();
@@ -70,6 +65,12 @@ public class Solution {
         }
 
         return count;
+    }
+
+    public void update(ArrayList<Integer> nodesValue) {
+        for (Integer nodeValue : nodesValue) {
+            solution.set(Math.abs(nodeValue) - 1, nodeValue);
+        }
     }
 
     public boolean isSolution(ClausesSet clausesSet, DefaultTableModel tableModel) {

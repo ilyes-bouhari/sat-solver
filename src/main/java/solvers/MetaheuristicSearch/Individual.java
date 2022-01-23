@@ -1,6 +1,7 @@
 package solvers.MetaheuristicSearch;
 
 import common.ClausesSet;
+import common.Solution;
 
 public class Individual implements Comparable<Individual> {
 

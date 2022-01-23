@@ -1,8 +1,7 @@
 package gui;
 
 import common.ClausesSet;
-import common.BaseSolution;
-import solvers.MetaheuristicSearch.Solution;
+import common.Solution;
 
 import javax.swing.*;
 import javax.swing.border.Border;

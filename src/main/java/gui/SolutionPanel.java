@@ -1,15 +1,11 @@
 package gui;
 
-import common.BaseSolution;
-import solvers.MetaheuristicSearch.Solution;
+import common.Solution;
 
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
-import javax.swing.plaf.basic.BasicHTML;
-import javax.swing.plaf.multi.MultiLabelUI;
-import javax.swing.text.View;
 import java.awt.*;
 
 public class SolutionPanel extends JPanel {

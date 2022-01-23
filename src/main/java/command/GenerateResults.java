@@ -1,11 +1,12 @@
 package command;
 
+import common.Solution;
 import enums.Solvers;
 import gui.ClausesPanel;
-import common.BaseSolution;
 import com.opencsv.CSVWriter;
 import solvers.BlindSearch.BlindSearch;
 import solvers.HeuristicSearch.HeuristicSearch;
+import solvers.MetaheuristicSearch.GeneticAlgorithm;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -25,7 +26,7 @@ public class GenerateResults {
     public static void main(String[] args) throws IOException {
 
         String[] directories = {"/uf75-325", "/uuf75-325"};
-        Solvers[] solvers = {Solvers.AStar, Solvers.DFS, Solvers.AG};
+        Solvers[] solvers = {Solvers.GA, Solvers.AStar, Solvers.DFS};
         ArrayDeque<String[]> solversAverageResults = new ArrayDeque<>();
 
         Arrays.stream(solvers).forEach(solver -> {
@@ -67,8 +68,8 @@ public class GenerateResults {
         ClausesPanel clausesPanel = new ClausesPanel();
         clausesPanel.loadClausesSet(file.toString());
 
-        int executionTimeInSeconds = 1;
-        BaseSolution solution = null;
+        int executionTimeInSeconds = 5;
+        Solution solution = null;
 
         // TODO : add execution time
         /*Instant start = Instant.now();
@@ -79,30 +80,46 @@ public class GenerateResults {
         switch (solver) {
             case DFS:
 
-                /*solution = BlindSearch.DepthFirstSearch(
+                solution = (new BlindSearch(
                     clausesPanel.getClausesSet(),
                     null,
                     null,
                     executionTimeInSeconds,
                     null,
                     null
-                );*/
+                )).DepthFirstSearch();
 
                 break;
+
             case AStar:
 
-                /*solution = HeuristicSearch.AStar(
+                solution = (new HeuristicSearch(
                     clausesPanel.getClausesSet(),
+                    null,
                     null,
                     executionTimeInSeconds,
                     null,
                     null
-                );*/
+                )).AStar();
+
+                break;
+
+            case GA:
+
+                solution = (new GeneticAlgorithm(
+                    clausesPanel.getClausesSet(),
+                    50,
+                    100,
+                    50,
+                    5,
+                    executionTimeInSeconds,
+                    0
+                )).process();
 
                 break;
         }
 
-        return solution.satisfiedClausesCount(clausesPanel.getClausesSet(), null);
+        return solution.satisfiedClauses(clausesPanel.getClausesSet(), null);
     }
 
     public static void createResultsCSVFile(String[] headers, ArrayDeque<String[]> records, String filename) {
