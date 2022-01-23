@@ -1,23 +1,20 @@
 package solvers.HeuristicSearch;
 
-import common.BaseSolution;
-
 import java.util.ArrayList;
 
-public class Solution extends BaseSolution {
+class Solution extends solvers.MetaheuristicSearch.Solution {
 
     public Solution(int size) {
         super(size);
     }
 
-    public Solution(BaseSolution solution) {
+    public Solution(solvers.MetaheuristicSearch.Solution solution) {
         super(solution);
     }
 
     public void update(ArrayList<Integer> nodesValue) {
         for (Integer nodeValue : nodesValue) {
-            this.solution.get(Math.abs(nodeValue) - 1)
-                .setValue(nodeValue);
+            solution.set(Math.abs(nodeValue) - 1, nodeValue);
         }
     }
 }

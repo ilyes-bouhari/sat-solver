@@ -6,11 +6,28 @@ import common.Clause;
 import common.ClausesSet;
 import gui.ClausesPanel;
 import gui.LaunchPanel;
+import gui.SolutionPanel;
 import tasks.AStarTask;
 
-public abstract class HeuristicSearch {
+public class HeuristicSearch {
 
-    public static Solution AStar(ClausesSet clausesSet, ClausesPanel clausesPanel, int executionTimeInSeconds, LaunchPanel launchPanel, AStarTask task) {
+    private final ClausesSet clausesSet;
+    private final ClausesPanel clausesPanel;
+    private final int executionTimeInSeconds;
+    private final LaunchPanel launchPanel;
+    private final SolutionPanel solutionPanel;
+    private final AStarTask task;
+
+    public HeuristicSearch(ClausesSet clausesSet, ClausesPanel clausesPanel, SolutionPanel solutionPanel, int executionTimeInSeconds, LaunchPanel launchPanel, AStarTask task) {
+        this.clausesSet = clausesSet;
+        this.clausesPanel = clausesPanel;
+        this.solutionPanel = solutionPanel;
+        this.executionTimeInSeconds = executionTimeInSeconds;
+        this.launchPanel = launchPanel;
+        this.task = task;
+    }
+
+    public Solution AStar() {
 
         ArrayList<Node> nodes = generateNodes(clausesSet);
         nodes.sort(Collections.reverseOrder());
@@ -33,10 +50,11 @@ public abstract class HeuristicSearch {
 
             solution.update(reconstructPath(currentNode));
 
-            if(solution.satisfiedClausesCount(clausesSet, null) > bestSolution.satisfiedClausesCount(clausesSet, null))
+            if(solution.satisfiedClauses(clausesSet, null) > bestSolution.satisfiedClauses(clausesSet, null))
                 bestSolution = new Solution(solution);
 
-            // if (launchPanel != null) launchPanel.getSummaryPanel().updateSummary(clausesSet, bestSolution);
+            if (launchPanel != null) launchPanel.getSummaryPanel().updateSummary(clausesSet, bestSolution);
+            if (solutionPanel != null) solutionPanel.setSolution(bestSolution);
 
             boolean response = bestSolution.isSolution(clausesSet, clausesPanel != null ? clausesPanel.getTableModel() : null);
             if (response) break;
@@ -58,14 +76,16 @@ public abstract class HeuristicSearch {
                     open.add(newNode);
                 }
 
-                Collections.sort(open, Collections.reverseOrder());
+                open.sort(Collections.reverseOrder());
             }
+
+            System.out.println(bestSolution.satisfiedClauses(clausesSet, null));
         }
 
         return bestSolution;
     }
 
-    public static ArrayList<Node> generateNodes(ClausesSet clausesSet) {
+    public ArrayList<Node> generateNodes(ClausesSet clausesSet) {
 
         int literal;
         ArrayList<Integer> variables = new ArrayList<>();
@@ -106,7 +126,7 @@ public abstract class HeuristicSearch {
         return nodes;
     }
 
-    public static int calculateHeuristic(ClausesSet clausesSet, int n) {
+    public int calculateHeuristic(ClausesSet clausesSet, int n) {
 
         int counter = 0;
         int literal;
@@ -126,7 +146,7 @@ public abstract class HeuristicSearch {
         return counter;
     }
 
-    public static int calculateCost(ClausesSet clausesSet, ArrayList<Integer> path) {
+    public int calculateCost(ClausesSet clausesSet, ArrayList<Integer> path) {
 
         int counter = 0;
         int literal;
@@ -145,7 +165,7 @@ public abstract class HeuristicSearch {
         return counter;
     }
 
-    public static ArrayList<Integer> reconstructPath(Node current) {
+    public ArrayList<Integer> reconstructPath(Node current) {
 
         ArrayList<Integer> path = new ArrayList<>();
 

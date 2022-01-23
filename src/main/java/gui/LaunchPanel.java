@@ -117,7 +117,7 @@ public class LaunchPanel extends JPanel {
                             clausesSet = clausesPanel.getClausesSet();
                             executionTimeInSeconds = Integer.parseInt(((ComboBoxItem) executionTimeComboBox.getSelectedItem()).getId());
 
-                            task = new AStarTask(clausesSet, clausesPanel, executionTimeInSeconds, launchPanel);
+                            task = new AStarTask(clausesSet, clausesPanel, solutionPanel, executionTimeInSeconds, launchPanel);
                             task.execute();
 
                             break;
