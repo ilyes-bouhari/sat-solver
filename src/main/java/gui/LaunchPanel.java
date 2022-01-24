@@ -3,8 +3,11 @@ package gui;
 import java.awt.*;
 import javax.swing.*;
 import common.ClausesSet;
+import enums.Solvers;
+import enums.StoppingCriteria;
 import tasks.AStarTask;
 import tasks.DepthFirstSearchTask;
+import tasks.GeneticAlgorithmTask;
 import utils.ComboBoxItem;
 import utils.ItemComboBoxRenderer;
 
@@ -63,13 +66,11 @@ public class LaunchPanel extends JPanel {
             }).toArray(ComboBoxItem[]::new);
 
         executionTimeComboBox = new JComboBox(range);
-        executionTimeComboBox.setRenderer(new ItemComboBoxRenderer(""));
         gridBagConstraints.fill = GridBagConstraints.BOTH;
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.weightx = 1;
         gridBagConstraints.weighty = 1;
-        executionTimeComboBox.setSelectedIndex(-1);
         add(executionTimeComboBox, gridBagConstraints);
 
         // Launch button
@@ -81,6 +82,7 @@ public class LaunchPanel extends JPanel {
         gridBagConstraints.weightx = 1;
         gridBagConstraints.weighty = 1;
         gridBagConstraints.gridwidth = 2;
+        gridBagConstraints.gridheight = 2;
         gridBagConstraints.fill = GridBagConstraints.BOTH;
         add(launchButton, gridBagConstraints);
     }
@@ -103,24 +105,45 @@ public class LaunchPanel extends JPanel {
                 if (!isRunning) {
 
                     toggleOnRunning(true);
-                    switch (solversPanel.getSolversComboBox().getSelectedIndex()) {
-                        case 0:
-                            clausesSet = clausesPanel.getClausesSet();
-                            executionTimeInSeconds = Integer.parseInt(((ComboBoxItem) executionTimeComboBox.getSelectedItem()).getId());
 
+                    Solvers solver = Solvers.valueOf(((ComboBoxItem) solversPanel.getSolversComboBox().getSelectedItem()).getId());
+                    executionTimeInSeconds = Integer.parseInt(((ComboBoxItem) executionTimeComboBox.getSelectedItem()).getId());
+                    clausesSet = clausesPanel.getClausesSet();
+
+                    switch (solver) {
+                        case DFS -> {
                             task = new DepthFirstSearchTask(clausesSet, clausesPanel, solutionPanel, executionTimeInSeconds, launchPanel);
                             task.execute();
-
-                            break;
-
-                        case 1:
-                            clausesSet = clausesPanel.getClausesSet();
-                            executionTimeInSeconds = Integer.parseInt(((ComboBoxItem) executionTimeComboBox.getSelectedItem()).getId());
-
+                        }
+                        case AStar -> {
                             task = new AStarTask(clausesSet, clausesPanel, solutionPanel, executionTimeInSeconds, launchPanel);
                             task.execute();
+                        }
+                        case GA -> {
 
-                            break;
+                            int populationSize = (int) solversPanel.getGaParamsPanel().getPopulationSizeSpinner().getValue();
+                            int maxIteration = (int) solversPanel.getGaParamsPanel().getMaxIterationSpinner().getValue();
+
+                            int crossoverRate = Integer.parseInt(((ComboBoxItem) solversPanel.getGaParamsPanel().getCrossoverRateComboBox().getSelectedItem()).getId());
+                            int mutationRate = Integer.parseInt(((ComboBoxItem) solversPanel.getGaParamsPanel().getMutationRateComboBox().getSelectedItem()).getId());
+
+                            StoppingCriteria stoppingCriteria = StoppingCriteria.valueOf(solversPanel.getGaParamsPanel().getStoppingCriteriaButtonGroup().getSelection().getActionCommand());
+
+                            task = new GeneticAlgorithmTask(
+                                clausesSet,
+                                clausesPanel,
+                                solutionPanel,
+                                launchPanel,
+
+                                populationSize,
+                                maxIteration,
+                                crossoverRate,
+                                mutationRate,
+                                stoppingCriteria,
+                                executionTimeInSeconds
+                            );
+                            task.execute();
+                        }
                     }
                 } else {
 
@@ -137,7 +160,7 @@ public class LaunchPanel extends JPanel {
     }
 
     public void enableLaunchButton() {
-        if (clausesLoaded && solverChosen && executionTimeIsSet) launchButton.setEnabled(true);
+        if (clausesLoaded) launchButton.setEnabled(true);
         else launchButton.setEnabled(false);
     }
 
@@ -148,6 +171,10 @@ public class LaunchPanel extends JPanel {
         clausesPanel.getLoadClausesButton().setEnabled(!isRunning);
         executionTimeComboBox.setEnabled(!isRunning);
         solversPanel.getSolversComboBox().setEnabled(!isRunning);
+        solversPanel.getGaParamsPanel().getPopulationSizeSpinner().setEnabled(!isRunning);
+        solversPanel.getGaParamsPanel().getMaxIterationSpinner().setEnabled(!isRunning);
+        solversPanel.getGaParamsPanel().getCrossoverRateComboBox().setEnabled(!isRunning);
+        solversPanel.getGaParamsPanel().getMutationRateComboBox().setEnabled(!isRunning);
         launchButton.setText(isRunning ? "STOP ( Running... )" : "Launch");
     }
 

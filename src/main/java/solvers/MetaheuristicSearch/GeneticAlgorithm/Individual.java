@@ -1,4 +1,4 @@
-package solvers.MetaheuristicSearch;
+package solvers.MetaheuristicSearch.GeneticAlgorithm;
 
 import common.ClausesSet;
 import common.Solution;

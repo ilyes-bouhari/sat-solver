@@ -52,10 +52,14 @@ public class SummaryPanel extends JPanel {
 
     public void updateSummary(ClausesSet clausesSet, Solution solution) {
         float count = solution.satisfiedClauses(clausesSet, null);
-        satisfiedClauses.setText((int) count + " clauses = " + Math.round(count*100/clausesSet.getNumberOfClause()) + "%");
+        satisfiedClauses.setText(getText(clausesSet, count));
 
         count = clausesSet.getNumberOfClause() - count;
-        nonSatisfiedClauses.setText((int) count + " clauses = " + Math.round(count*100/clausesSet.getNumberOfClause()) + "%");
+        nonSatisfiedClauses.setText(getText(clausesSet, count));
+    }
+
+    public String getText(ClausesSet clausesSet, float count) {
+        return ((int) count + " clauses = " + String.format("%.2f", (float) (count*100/clausesSet.getNumberOfClause())) + "%");
     }
 
     public JLabel getSatisfiedClauses() {

@@ -26,7 +26,7 @@ public class Main extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds((int) screenSize.getWidth() / 4, (int) screenSize.getHeight() / 4, 700, 650);
+        setBounds((int) screenSize.getWidth() / 4, (int) screenSize.getHeight() / 4, 800, 750);
         setResizable(false);
 
         // Content Panel
@@ -68,17 +68,20 @@ public class Main extends JFrame {
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.weightx = 1;
-        gridBagConstraints.weighty = 1;
+        gridBagConstraints.gridheight = 2;
         dataPanel.add(solversPanel, gridBagConstraints);
 
         // Launch Panel
         gridBagConstraints = new GridBagConstraints();
         launchPanel = new LaunchPanel();
-        gridBagConstraints.fill = GridBagConstraints.BOTH;
+        gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
         gridBagConstraints.insets = new Insets(0, 5, 0, 0);
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 2;
-        gridBagConstraints.weighty = 0.25;
+        gridBagConstraints.weightx = 1;
+        gridBagConstraints.weighty = 1;
+        gridBagConstraints.ipady = 50;
+        gridBagConstraints.anchor = GridBagConstraints.PAGE_END;
         dataPanel.add(launchPanel, gridBagConstraints);
 
         // Summary Panel

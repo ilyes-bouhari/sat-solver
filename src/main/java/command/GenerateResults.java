@@ -2,14 +2,13 @@ package command;
 
 import common.Solution;
 import enums.Solvers;
+import enums.StoppingCriteria;
 import gui.ClausesPanel;
 import com.opencsv.CSVWriter;
 import solvers.BlindSearch.BlindSearch;
 import solvers.HeuristicSearch.HeuristicSearch;
-import solvers.MetaheuristicSearch.GeneticAlgorithm;
+import solvers.MetaheuristicSearch.MetaheuristicSearch;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.util.*;
 import java.io.File;
 import java.io.FileWriter;
@@ -106,15 +105,21 @@ public class GenerateResults {
 
             case GA:
 
-                solution = (new GeneticAlgorithm(
+                solution = (new MetaheuristicSearch()).GeneticAlgorithm(
                     clausesPanel.getClausesSet(),
+                    null,
+                    null,
+                    null,
+
                     50,
                     100,
                     50,
                     5,
+                    StoppingCriteria.EXECUTION_TIME,
                     executionTimeInSeconds,
-                    0
-                )).process();
+
+                    null
+                ).process();
 
                 break;
         }

@@ -1,10 +1,13 @@
-package solvers.MetaheuristicSearch;
+package solvers.MetaheuristicSearch.GeneticAlgorithm;
 
 import common.ClausesSet;
 import common.Solution;
+import enums.StoppingCriteria;
+import gui.ClausesPanel;
+import gui.LaunchPanel;
+import gui.SolutionPanel;
+import tasks.GeneticAlgorithmTask;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
@@ -13,25 +16,52 @@ import java.util.concurrent.ThreadLocalRandom;
 public class GeneticAlgorithm {
 
     private ClausesSet clausesSet;
-    private ArrayList<Individual> population;
-    private Individual firstParent, secondParent, firstChild, secondChild, bestIndividual;
+
+    private final ClausesPanel clausesPanel;
+    private final SolutionPanel solutionPanel;
+    private final LaunchPanel launchPanel;
+
     private final int populationSize;
     private final int maxIterations;
-    private int iteration = 0;
     private final int crossoverRate;
     private final int mutationRate;
+    private final StoppingCriteria stoppingCriteria;
     private final int executionTimeInSeconds;
-    private final int stoppingCriteria;
+    private final GeneticAlgorithmTask task;
+
+    private ArrayList<Individual> population;
+    private Individual firstParent, secondParent, firstChild, secondChild, bestIndividual;
+    private int iteration = 0;
+
     private final Random random = new Random();
 
-    public GeneticAlgorithm(ClausesSet clausesSet, int populationSize, int maxIterations, int crossoverRate, int mutationRate, int executionTimeInSeconds, int stoppingCriteria) {
+    public GeneticAlgorithm(
+        ClausesSet clausesSet,
+        ClausesPanel clausesPanel,
+        SolutionPanel solutionPanel,
+        LaunchPanel launchPanel,
+
+        int populationSize,
+        int maxIterations,
+        int crossoverRate,
+        int mutationRate,
+        StoppingCriteria stoppingCriteria,
+        int executionTimeInSeconds,
+
+        GeneticAlgorithmTask task
+    ) {
         this.clausesSet = clausesSet;
+        this.clausesPanel = clausesPanel;
+        this.solutionPanel = solutionPanel;
+        this.launchPanel = launchPanel;
+
         this.populationSize = populationSize;
         this.maxIterations = maxIterations;
         this.crossoverRate = crossoverRate;
         this.mutationRate = mutationRate;
-        this.executionTimeInSeconds = executionTimeInSeconds;
         this.stoppingCriteria = stoppingCriteria;
+        this.executionTimeInSeconds = executionTimeInSeconds;
+        this.task = task;
     }
 
     public Solution process() {
@@ -46,7 +76,7 @@ public class GeneticAlgorithm {
         do {
             iteration++;
 
-            if ((((System.currentTimeMillis() - startTime)/1000) >= executionTimeInSeconds) && stoppingCriteria == 0)
+            if (((((System.currentTimeMillis() - startTime)/1000) >= executionTimeInSeconds) && stoppingCriteria == StoppingCriteria.EXECUTION_TIME) || (task != null && (task.isCancelled() || task.isDone())))
                 break;
 
             /**
@@ -83,18 +113,24 @@ public class GeneticAlgorithm {
              */
             fitnessBasedInsertion();
 
+            if (launchPanel != null) launchPanel.getSummaryPanel().updateSummary(clausesSet, bestIndividual.getSolution());
+            if (solutionPanel != null) solutionPanel.setSolution(bestIndividual.getSolution());
+
+            boolean response = bestIndividual.getSolution().isSolution(clausesSet, clausesPanel != null ? clausesPanel.getTableModel() : null);
+            if (response) break;
+
             // System.out.println(bestIndividual.getFitness());
         } while (stoppingCriteria(stoppingCriteria));
 
         return bestIndividual.getSolution();
     }
 
-    public boolean stoppingCriteria(int choice) {
+    public boolean stoppingCriteria(StoppingCriteria choice) {
 
         return switch (choice) {
-            case 1 -> bestIndividual.getFitness() < clausesSet.getNumberOfClause();
-            case 2 -> iteration < maxIterations;
-            default -> true;
+            case EXECUTION_TIME -> true;
+            case MAX_GENERATION -> iteration < maxIterations;
+            case MAX_FITNESS -> bestIndividual.getFitness() < clausesSet.getNumberOfClause();
         };
     }
 
@@ -228,7 +264,7 @@ public class GeneticAlgorithm {
         population.set(1, secondChild);
     }
 
-    public static void main(String[] args) {
+    /*public static void main(String[] args) {
 
         String file = "/Users/ilyes/Code/master/s3/bio-inspired/project/target/classes/uf75-325/uf75-01.cnf";
 
@@ -240,5 +276,5 @@ public class GeneticAlgorithm {
         geneticAlgorithm.process();
         Instant finish = Instant.now();
         System.out.println((float) Duration.between(start, finish).toMillis() / 1000);
-    }
+    }*/
 }
