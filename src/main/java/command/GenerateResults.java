@@ -65,7 +65,7 @@ public class GenerateResults {
     public static int satisfiedClausesCount(File file, Solvers solver) {
 
         ClausesPanel clausesPanel = new ClausesPanel();
-        clausesPanel.loadClausesSet(file.toString());
+        clausesPanel.loadClausesSet(GenerateResults.class.getResourceAsStream(String.valueOf(file)));
 
         int executionTimeInSeconds = 5;
         Solution solution = null;

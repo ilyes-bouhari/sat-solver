@@ -7,7 +7,7 @@ import utils.CustomTableCellRenderer;
 import java.awt.*;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
-import java.util.Objects;
+import java.io.InputStream;
 import java.util.stream.IntStream;
 import java.awt.event.ActionListener;
 import javax.swing.border.Border;
@@ -128,10 +128,12 @@ public class ClausesPanel extends JPanel {
                 String filePath = "/" + benchmarkType + "/" + benchmarkType.split("-")[0] + "-" + String.format("%0" + (benchmarkInstance.length()+1) + "d", Integer.parseInt(benchmarkInstance)) + ".cnf";
 
                 try {
-                    loadClausesSet(Objects.requireNonNull(getClass().getResource(filePath)).getPath());
+                    loadClausesSet(getClass().getResourceAsStream(filePath));
                     launchPanel.setClausesLoaded(true);
                     launchPanel.enableLaunchButton();
-                } catch (NullPointerException ignore) {}
+                } catch (Exception exception) {
+                    System.out.println(exception);
+                }
             }
         });
 
@@ -152,8 +154,8 @@ public class ClausesPanel extends JPanel {
         });
     }
 
-    public void loadClausesSet(String cnf_filePath) {
-        clausesSet = new ClausesSet(cnf_filePath);
+    public void loadClausesSet(InputStream inputStream) {
+        clausesSet = new ClausesSet(inputStream);
 
         tableModel = new DefaultTableModel();
         tableModel.addColumn("State");

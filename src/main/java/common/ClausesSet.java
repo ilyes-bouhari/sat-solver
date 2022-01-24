@@ -9,15 +9,13 @@ public class ClausesSet {
     private int clauseSize = 0;
     private int numberVariables;
 
-    public ClausesSet(String cnf_filePath) {
-
-        File file = new File(cnf_filePath);
+    public ClausesSet(InputStream inputStream) {
 
         BufferedReader br = null;
         try {
-            br = new BufferedReader(new FileReader(file));
-        } catch (FileNotFoundException ignore) {
-
+            br = new BufferedReader(new InputStreamReader(inputStream));
+        } catch (Exception exception) {
+            System.out.println("Exception while reading file :" + exception);
         }
 
         String line;
