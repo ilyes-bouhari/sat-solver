@@ -111,6 +111,41 @@ public class LaunchPanel extends JPanel {
                     clausesSet = clausesPanel.getClausesSet();
 
                     switch (solver) {
+                        case DFS:
+                            task = new DepthFirstSearchTask(clausesSet, clausesPanel, solutionPanel, executionTimeInSeconds, launchPanel);
+                            task.execute();
+                            break;
+                        case AStar:
+                            task = new AStarTask(clausesSet, clausesPanel, solutionPanel, executionTimeInSeconds, launchPanel);
+                            task.execute();
+                            break;
+                        case GA:
+                            int populationSize = (int) solversPanel.getGaParamsPanel().getPopulationSizeSpinner().getValue();
+                            int maxIteration = (int) solversPanel.getGaParamsPanel().getMaxIterationSpinner().getValue();
+
+                            int crossoverRate = Integer.parseInt(((ComboBoxItem) solversPanel.getGaParamsPanel().getCrossoverRateComboBox().getSelectedItem()).getId());
+                            int mutationRate = Integer.parseInt(((ComboBoxItem) solversPanel.getGaParamsPanel().getMutationRateComboBox().getSelectedItem()).getId());
+
+                            StoppingCriteria stoppingCriteria = StoppingCriteria.valueOf(solversPanel.getGaParamsPanel().getStoppingCriteriaButtonGroup().getSelection().getActionCommand());
+
+                            task = new GeneticAlgorithmTask(
+                                    clausesSet,
+                                    clausesPanel,
+                                    solutionPanel,
+                                    launchPanel,
+
+                                    populationSize,
+                                    maxIteration,
+                                    crossoverRate,
+                                    mutationRate,
+                                    stoppingCriteria,
+                                    executionTimeInSeconds
+                            );
+                            task.execute();
+                            break;
+                    }
+
+                    /*switch (solver) {
                         case DFS -> {
                             task = new DepthFirstSearchTask(clausesSet, clausesPanel, solutionPanel, executionTimeInSeconds, launchPanel);
                             task.execute();
@@ -144,7 +179,7 @@ public class LaunchPanel extends JPanel {
                             );
                             task.execute();
                         }
-                    }
+                    }*/
                 } else {
 
                     launchButton.setEnabled(false);

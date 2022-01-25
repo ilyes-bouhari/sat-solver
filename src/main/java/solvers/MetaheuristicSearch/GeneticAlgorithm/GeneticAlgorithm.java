@@ -127,11 +127,16 @@ public class GeneticAlgorithm {
 
     public boolean stoppingCriteria(StoppingCriteria choice) {
 
-        return switch (choice) {
-            case EXECUTION_TIME -> true;
-            case MAX_GENERATION -> iteration < maxIterations;
-            case MAX_FITNESS -> bestIndividual.getFitness() < clausesSet.getNumberOfClause();
-        };
+        switch (choice) {
+            case EXECUTION_TIME:
+                return true;
+            case MAX_GENERATION:
+                return iteration < maxIterations;
+            case MAX_FITNESS:
+                return bestIndividual.getFitness() < clausesSet.getNumberOfClause();
+            default:
+                throw new IllegalArgumentException();
+        }
     }
 
     public ArrayList<Individual> generatePopulation(ClausesSet clausesSet, int populationSize) {

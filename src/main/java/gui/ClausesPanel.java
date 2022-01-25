@@ -47,6 +47,7 @@ public class ClausesPanel extends JPanel {
 
         clausesTable = new JTable();
         clausesTable.getTableHeader().setBorder(new LineBorder(Color.BLACK, 1, true));
+        clausesTable.getTableHeader().setBackground(Color.WHITE);
         clausesTable.setEnabled(false);
         clausesTable.setShowGrid(true);
         clausesTable.setGridColor(Color.BLACK);
