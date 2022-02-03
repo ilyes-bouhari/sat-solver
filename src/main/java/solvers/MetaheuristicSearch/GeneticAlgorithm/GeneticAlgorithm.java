@@ -85,7 +85,7 @@ public class GeneticAlgorithm {
              * Option 2: rouletteWheelSelection()
              * Option 3: fittestParentSelection()
              */
-            fittestParentSelection();
+            randomSelection();
 
             /**
              * Crossover

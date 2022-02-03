@@ -1,5 +1,6 @@
 package command;
 
+import common.ClausesSet;
 import common.Solution;
 import enums.Solvers;
 import enums.StoppingCriteria;
@@ -9,6 +10,8 @@ import solvers.BlindSearch.BlindSearch;
 import solvers.HeuristicSearch.HeuristicSearch;
 import solvers.MetaheuristicSearch.MetaheuristicSearch;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 import java.io.File;
 import java.io.FileWriter;
@@ -16,14 +19,20 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.stream.IntStream;
 
 public class GenerateResults {
 
-    private static String[] solversResultsPerFileHeaders = {"filename", "satisfied"};
-    private static String[] solversResultsAverageHeaders = {"solver", "value"};
+    private static String[] gaParamsTuningResultsFileHeader = new String[] {"value", "satisfied"};
+    private static String[] solversResultsPerFileHeaders = {"filename", "time of execution", "satisfied", "satisfiability rate"};
+    private static String[] solversResultsAverageHeaders = {"solver", "time of execution", "satisfied", "satisfiability rate"};
 
     public static void main(String[] args) throws IOException {
 
+        generateGAResults();
+    }
+
+    public static void generateAllSolversResults() {
         String[] directories = {"/uf75-325", "/uuf75-325"};
         Solvers[] solvers = {Solvers.GA, Solvers.AStar, Solvers.DFS};
         ArrayDeque<String[]> solversAverageResults = new ArrayDeque<>();
@@ -34,26 +43,40 @@ public class GenerateResults {
             Arrays.stream(directories).forEach(directory -> {
                 try {
                     Files.walk(Paths.get(Objects.requireNonNull(GenerateResults.class.getResource(directory)).getPath()))
-                        .map(Path::toFile)
-                        .forEach((File file) -> {
-                            if (file.isFile()) {
+                            .map(Path::toFile)
+                            .forEach((File file) -> {
+                                if (file.isFile()) {
 
-                                String[] filePathSplit = String.valueOf(file).split("/");
-                                String filename = filePathSplit[filePathSplit.length - 1].split("\\.")[0];
-                                String count = String.valueOf(satisfiedClausesCount(file, solver));
+                                    String[] filePathSplit = String.valueOf(file).split("/");
+                                    String filePath = "/" + filePathSplit[filePathSplit.length - 2] + "/" + filePathSplit[filePathSplit.length - 1];
+                                    String filename = filePathSplit[filePathSplit.length - 1].split("\\.")[0];
 
-                                records.addLast(new String[]{filename, count});
-                                System.out.println("'" + filename + "' file processed with " + solver + " solver result to " + count + " clause satisfied.");
-                            }
-                        });
+                                    Instant start = Instant.now();
+                                    String count = String.valueOf(satisfiedClausesCount(filePath, solver));
+                                    Instant finish = Instant.now();
+
+                                    String timeOfExecution = solver == Solvers.GA ? String.valueOf((float) Duration.between(start, finish).toMillis() / 1000) : "5";
+                                    String satisfiabilityRate = String.format("%.2f", (Float.parseFloat(count)*100/325));
+
+                                    records.addLast(new String[]{filename, timeOfExecution, count, satisfiabilityRate});
+                                    System.out.println("'" + filename + "' file processed with " + solver + " solver result to " + count + " clause satisfied in " + timeOfExecution + " seconds.");
+                                }
+                            });
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             });
 
             // solver average result
-            int sum = records.stream().mapToInt(record -> Integer.parseInt(record[1])).sum();
-            solversAverageResults.addLast(new String[] {String.valueOf(solver), String.valueOf(sum/records.size())});
+            float averageTimeOfExecution = ((float) records.stream().mapToDouble(record -> Float.parseFloat(record[1])).sum()) / records.size();
+            int averageSatisfiedClausesCount = records.stream().mapToInt(record -> Integer.parseInt(record[2])).sum() / records.size();
+            String averageSatisfiabilityRate = String.format("%.2f", ((float) averageSatisfiedClausesCount*100)/325);
+            solversAverageResults.addLast(
+                    new String[] {String.valueOf(solver),
+                            String.valueOf(averageTimeOfExecution),
+                            String.valueOf(averageSatisfiedClausesCount),
+                            averageSatisfiabilityRate}
+            );
 
             // solver result for each file
             createResultsCSVFile(solversResultsPerFileHeaders, records, (solver + ".csv"));
@@ -62,20 +85,14 @@ public class GenerateResults {
         createResultsCSVFile(solversResultsAverageHeaders, solversAverageResults, "average.csv");
     }
 
-    public static int satisfiedClausesCount(File file, Solvers solver) {
+    public static int satisfiedClausesCount(String file, Solvers solver) {
 
         ClausesPanel clausesPanel = new ClausesPanel();
-        clausesPanel.loadClausesSet(GenerateResults.class.getResourceAsStream(String.valueOf(file)));
+        clausesPanel.loadClausesSet(GenerateResults.class.getResourceAsStream(file));
 
         int executionTimeInSeconds = 5;
         Solution solution = null;
 
-        // TODO : add execution time
-        /*Instant start = Instant.now();
-        // solver goes here !
-        Instant finish = Instant.now();
-        System.out.println((float) Duration.between(start, finish).toMillis() / 1000);*/
-        
         switch (solver) {
             case DFS:
 
@@ -112,10 +129,10 @@ public class GenerateResults {
                     null,
 
                     50,
-                    100,
+                    4000,
                     50,
                     5,
-                    StoppingCriteria.EXECUTION_TIME,
+                    StoppingCriteria.MAX_GENERATION,
                     executionTimeInSeconds,
 
                     null
@@ -146,5 +163,149 @@ public class GenerateResults {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static void generateGAResults() {
+
+        Integer[] numberOfIterations = IntStream.iterate(0, i -> i + 100).limit(61).boxed()
+                .filter(time -> time != 0).toArray(Integer[]::new);
+
+
+        Integer[] sizeOfPopulations = IntStream.iterate(0, i -> i + 10).limit(11).boxed()
+                .filter(time -> time != 0).toArray(Integer[]::new);
+
+        Integer[] crossoverRates = IntStream.iterate(0, i -> i + 10).limit(11).boxed()
+                .filter(time -> time != 0).toArray(Integer[]::new);
+
+        Integer[] mutationRates = IntStream.iterate(0, i -> i + 5).limit(11).boxed()
+                .filter(time -> time != 0).toArray(Integer[]::new);
+
+        ClausesPanel clausesPanel = new ClausesPanel();
+        clausesPanel.loadClausesSet(GenerateResults.class.getResourceAsStream("/uf75-325/uf75-01.cnf"));
+
+        generateGAResultsForNumberOfIterations(clausesPanel.getClausesSet(), numberOfIterations);
+        generateGAResultsForSizeOfPopulations(clausesPanel.getClausesSet(), sizeOfPopulations);
+        generateGAResultsForCrossoverRates(clausesPanel.getClausesSet(), crossoverRates);
+        generateGAResultsForMutationRates(clausesPanel.getClausesSet(), mutationRates);
+    }
+
+    public static void generateGAResultsForNumberOfIterations(ClausesSet clausesSet, Integer[] numberOfIterations) {
+
+        ArrayDeque<String[]> records = new ArrayDeque<>();
+        for (int iteration : numberOfIterations) {
+
+            Solution solution = (new MetaheuristicSearch()).GeneticAlgorithm(
+                    clausesSet,
+                    null,
+                    null,
+                    null,
+
+                    50,
+                    iteration,
+                    50,
+                    5,
+                    StoppingCriteria.MAX_GENERATION,
+                    1,
+
+                    null
+            ).process();
+
+            records.add(new String[] {
+                    String.valueOf(iteration),
+                    String.valueOf(solution.satisfiedClauses(clausesSet, null))
+            });
+        }
+
+        createResultsCSVFile(gaParamsTuningResultsFileHeader, records, "ga-params-tuning-iterations.csv");
+    }
+
+    public static void generateGAResultsForSizeOfPopulations(ClausesSet clausesSet, Integer[] sizeOfPopulations) {
+
+        ArrayDeque<String[]> records = new ArrayDeque<>();
+        for (int size : sizeOfPopulations) {
+
+            Solution solution = (new MetaheuristicSearch()).GeneticAlgorithm(
+                    clausesSet,
+                    null,
+                    null,
+                    null,
+
+                    size,
+                    5000,
+                    50,
+                    5,
+                    StoppingCriteria.MAX_GENERATION,
+                    1,
+
+                    null
+            ).process();
+
+            records.add(new String[] {
+                String.valueOf(size),
+                String.valueOf(solution.satisfiedClauses(clausesSet, null))
+            });
+        }
+
+        createResultsCSVFile(gaParamsTuningResultsFileHeader, records, "ga-params-tuning-population-size.csv");
+    }
+
+    public static void generateGAResultsForCrossoverRates(ClausesSet clausesSet, Integer[] crossoverRates) {
+
+        ArrayDeque<String[]> records = new ArrayDeque<>();
+        for (int crossoverRate : crossoverRates) {
+
+            Solution solution = (new MetaheuristicSearch()).GeneticAlgorithm(
+                    clausesSet,
+                    null,
+                    null,
+                    null,
+
+                    50,
+                    5000,
+                    crossoverRate,
+                    5,
+                    StoppingCriteria.MAX_GENERATION,
+                    1,
+
+                    null
+            ).process();
+
+            records.add(new String[] {
+                String.valueOf(crossoverRate),
+                String.valueOf(solution.satisfiedClauses(clausesSet, null))
+            });
+        }
+
+        createResultsCSVFile(gaParamsTuningResultsFileHeader, records, "ga-params-tuning-crossover-rate.csv");
+    }
+
+    public static void generateGAResultsForMutationRates(ClausesSet clausesSet, Integer[] mutationRates) {
+
+        ArrayDeque<String[]> records = new ArrayDeque<>();
+        for (int mutationRate : mutationRates) {
+
+            Solution solution = (new MetaheuristicSearch()).GeneticAlgorithm(
+                    clausesSet,
+                    null,
+                    null,
+                    null,
+
+                    50,
+                    5000,
+                    50,
+                    mutationRate,
+                    StoppingCriteria.MAX_GENERATION,
+                    1,
+
+                    null
+            ).process();
+
+            records.add(new String[] {
+                String.valueOf(mutationRate),
+                String.valueOf(solution.satisfiedClauses(clausesSet, null))
+            });
+        }
+
+        createResultsCSVFile(gaParamsTuningResultsFileHeader, records, "ga-params-tuning-mutation-rate.csv");
     }
 }

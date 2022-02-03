@@ -75,7 +75,7 @@ public class BlindSearch {
             if (response) break;
 
             level = temp;
-        } while (level > 0 && level <= clausesSet.getNumberOfVariables());
+        } while (level > 0);
 
         return bestSolution;
     }
