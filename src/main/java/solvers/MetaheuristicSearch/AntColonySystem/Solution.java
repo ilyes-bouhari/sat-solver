@@ -14,6 +14,10 @@ public class Solution extends common.Solution {
         super(size);
     }
 
+    public Solution(common.Solution solution) {
+        super(solution);
+    }
+
     public Solution(Solution solution) {
         super(solution);
         this.unsatisfiedClauses = solution.getUnsatisfiedClauses();

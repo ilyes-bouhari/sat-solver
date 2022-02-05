@@ -1,14 +1,13 @@
 package solvers.MetaheuristicSearch.AntColonySystem;
 
-import com.sun.tools.javac.util.List;
-import command.GenerateResults;
-import common.Clause;
-import common.ClausesSet;
-import gui.ClausesPanel;
-import solvers.HeuristicSearch.Node;
-
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
+
+import common.Clause;
+import gui.ClausesPanel;
+import common.ClausesSet;
+import command.GenerateResults;
+import solvers.HeuristicSearch.HeuristicSearch;
 
 public class Colony {
 
@@ -16,6 +15,7 @@ public class Colony {
     private final ClausesPanel clausesPanel;
     private HashMap<Integer, Literal> literals;
     private Solution solution;
+    private final common.Solution baseSolution;
     private ArrayList<Literal> tempLiterals = new ArrayList<>();
 
     private final double alpha;
@@ -27,9 +27,10 @@ public class Colony {
     private final double q0;
     HashMap<Integer, Double> pheromone = new HashMap<>();
 
-    Colony(ClausesSet clausesSet, ClausesPanel clausesPanel, double alpha, double beta, int maxIterations, int numberOfAnts, double pheromoneInit, double evaporationRate, double q0) {
+    Colony(ClausesSet clausesSet, ClausesPanel clausesPanel, common.Solution baseSolution, double alpha, double beta, int maxIterations, int numberOfAnts, double pheromoneInit, double evaporationRate, double q0) {
         this.clausesSet = clausesSet;
         this.clausesPanel = clausesPanel;
+        this.baseSolution = baseSolution;
         this.alpha = alpha;
         this.beta = beta;
         this.maxIterations = maxIterations;
@@ -75,7 +76,7 @@ public class Colony {
 
         Literal literal;
         literals = generateSetOfLiterals();
-        solution = new Solution(clausesSet.getNumberOfVariables());
+        solution = new Solution(baseSolution);
 
         while (literals.size() > 0) {
             literal = nextLiteral();
@@ -100,7 +101,7 @@ public class Colony {
     Solution improveSearch(Solution solution) {
 
         Solution tempSolution = new Solution(solution);
-        for (int i = 0; i < 60; i++) {
+        for (int i = 0; i < 5; i++) {
 
             if (solution.getUnsatisfiedClauses().size() == 0) break;
 
@@ -133,6 +134,12 @@ public class Colony {
         ArrayList<Integer> variables = new ArrayList<>();
         HashMap<Integer, Literal> literals = new HashMap<>();
 
+        for (int i = 0; i < baseSolution.getSolutionSize(); i++) {
+            if (baseSolution.getLiteral(i) != 0) {
+                variables.add(i+1);
+            }
+        }
+
         for (int i = 0; i < clausesSet.getNumberOfClause(); i++) {
 
             Clause clause = clausesSet.getClause(i);
@@ -144,10 +151,10 @@ public class Colony {
 
                     literals.put(literal, new Literal(literal, calculateHeuristic(literal)));
                     literals.put(-literal, new Literal(-literal, calculateHeuristic(-literal)));
-
-                    pheromone.put(literal, pheromoneInit);
-                    pheromone.put(-literal, pheromoneInit);
                 }
+
+                pheromone.put(literal, pheromoneInit);
+                pheromone.put(-literal, pheromoneInit);
             }
         }
 
@@ -165,25 +172,6 @@ public class Colony {
                 literal = clausesSet.getClause(i).getLiteral(j);
 
                 if (literal == l) {
-                    counter++;
-                    break;
-                }
-            }
-        }
-
-        return counter;
-    }
-
-    public int calculateCost(ClausesSet clausesSet, Solution solution) {
-
-        int counter = 0;
-        int literal;
-
-        for (int i = 0; i < clausesSet.getNumberOfClause(); i++) {
-            for (int j = 0; j < clausesSet.getClause(i).getNumberOfLiterals(); j++) {
-                literal = clausesSet.getClause(i).getLiteral(j);
-
-                if (literal == solution.getLiteral(Math.abs(literal)-1)) {
                     counter++;
                     break;
                 }
@@ -243,7 +231,6 @@ public class Colony {
             if (sum == 0) {
                 literal.calculateProbability(
                     Math.pow(getPheromone(literal.getValue()), alpha) *
-                    // Math.pow(literal.getHeuristic() + calculateCost(clausesSet, solution), beta)
                     Math.pow(literal.getHeuristic(), beta)
                 );
             } else {
@@ -261,9 +248,20 @@ public class Colony {
     public static void main(String[] args) {
 
         ClausesPanel clausesPanel = new ClausesPanel();
-        clausesPanel.loadClausesSet(GenerateResults.class.getResourceAsStream("/uf75-325/uf75-01.cnf"));
+        clausesPanel.loadClausesSet(GenerateResults.class.getResourceAsStream("/uf75-325/uf75-03.cnf"));
 
-        Colony colony = new Colony(clausesPanel.getClausesSet(), null, .1, .1 , 1000, 10, .1,.1, .7);
+        common.Solution solution = (new HeuristicSearch(
+            clausesPanel.getClausesSet(),
+            null,
+            null,
+            1,
+            null,
+            null
+        )).AStar();
+
+        System.out.println("A* : " + solution.satisfiedClauses(clausesPanel.getClausesSet(), null));
+
+        Colony colony = new Colony(clausesPanel.getClausesSet(), null, solution, .1, .1 , 1000, 2, .1,.1, .7);
 
         System.out.println(colony.run());
     }
