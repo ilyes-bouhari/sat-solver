@@ -13,7 +13,7 @@ public class Solution {
     }
 
     public Solution(Solution solution) {
-        for(int i = 0; i < solution.getSolutionSize(); i++)
+        for(int i = 0; i < solution.getSize(); i++)
             this.solution.add(solution.getLiteral(i));
     }
 
@@ -21,14 +21,14 @@ public class Solution {
         return this.solution.get(position);
     }
 
-    public int getSolutionSize() {
+    public int getSize() {
         return this.solution.size();
     }
 
     public void randomSolution() {
         int random;
 
-        for(int i = 0; i < this.getSolutionSize(); i++) {
+        for(int i = 0; i < this.getSize(); i++) {
             random = (int) (Math.random() * 10) % 2;
 
             this.solution.set(i, ((i+1) * (random == 0 ? -1 : 1)));
@@ -43,7 +43,7 @@ public class Solution {
         this.solution.set(position, -this.solution.get(position));
     }
 
-    public int satisfiedClauses(ClausesSet clausesSet, DefaultTableModel tableModel) {
+    public int countSatisfiedClauses(ClausesSet clausesSet, DefaultTableModel tableModel) {
 
         int count = 0;
         int literal = 0;
@@ -73,8 +73,8 @@ public class Solution {
         }
     }
 
-    public boolean isSolution(ClausesSet clausesSet, DefaultTableModel tableModel) {
-        return clausesSet.getNumberOfClause() == satisfiedClauses(clausesSet, tableModel);
+    public boolean isTargetReached(ClausesSet clausesSet, DefaultTableModel tableModel) {
+        return clausesSet.getNumberOfClause() == countSatisfiedClauses(clausesSet, tableModel);
     }
 
     @Override
@@ -82,9 +82,9 @@ public class Solution {
 
         Solution otherSolution = (Solution) o;
 
-        if (getSolutionSize() != otherSolution.getSolutionSize()) return false;
+        if (getSize() != otherSolution.getSize()) return false;
 
-        for (int i = 0; i < getSolutionSize(); i++) {
+        for (int i = 0; i < getSize(); i++) {
             if (getLiteral(i) != otherSolution.getLiteral(i)) return false;
         }
 

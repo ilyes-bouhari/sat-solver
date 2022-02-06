@@ -28,7 +28,7 @@ public class Solution extends common.Solution {
     }
 
     @Override
-    public int satisfiedClauses(ClausesSet clausesSet, DefaultTableModel tableModel) {
+    public int countSatisfiedClauses(ClausesSet clausesSet, DefaultTableModel tableModel) {
 
         int count = 0;
         int literal = 0;

@@ -71,7 +71,7 @@ public class BlindSearch {
             if (launchPanel != null) launchPanel.getSummaryPanel().updateSummary(clausesSet, bestSolution);
             if (solutionPanel != null) solutionPanel.setSolution(bestSolution);
 
-            boolean response = bestSolution.isSolution(clausesSet, clausesPanel != null ? clausesPanel.getTableModel() : null);
+            boolean response = bestSolution.isTargetReached(clausesSet, clausesPanel != null ? clausesPanel.getTableModel() : null);
             if (response) break;
 
             level = temp;
@@ -82,7 +82,7 @@ public class BlindSearch {
 
     public void updateThenVerifySolution(int index) {
         solution.changeLiteral(index, currentNode.getValue());
-        if(solution.satisfiedClauses(clausesSet, null) > bestSolution.satisfiedClauses(clausesSet, null))
+        if(solution.countSatisfiedClauses(clausesSet, null) > bestSolution.countSatisfiedClauses(clausesSet, null))
             bestSolution = new Solution(solution);
     }
 

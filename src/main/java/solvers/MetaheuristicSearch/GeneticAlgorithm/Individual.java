@@ -11,17 +11,17 @@ public class Individual implements Comparable<Individual> {
     public Individual(ClausesSet clausesSet) {
         this.solution = new Solution(clausesSet.getNumberOfVariables());
         this.solution.randomSolution();
-        this.fitness = this.solution.satisfiedClauses(clausesSet, null);
+        this.fitness = this.solution.countSatisfiedClauses(clausesSet, null);
     }
 
     public Individual(ClausesSet clausesSet, Solution solution) {
         this.solution = new Solution(solution);
-        this.fitness = this.solution.satisfiedClauses(clausesSet, null);
+        this.fitness = this.solution.countSatisfiedClauses(clausesSet, null);
     }
 
     public void mutate(ClausesSet clausesSet, int position) {
         this.solution.invertLiteral(position);
-        this.fitness = this.solution.satisfiedClauses(clausesSet, null);
+        this.fitness = this.solution.countSatisfiedClauses(clausesSet, null);
     }
 
     public Solution getSolution() {

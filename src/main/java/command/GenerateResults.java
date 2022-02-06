@@ -141,7 +141,7 @@ public class GenerateResults {
                 break;
         }
 
-        return solution.satisfiedClauses(clausesPanel.getClausesSet(), null);
+        return solution.countSatisfiedClauses(clausesPanel.getClausesSet(), null);
     }
 
     public static void createResultsCSVFile(String[] headers, ArrayDeque<String[]> records, String filename) {
@@ -212,7 +212,7 @@ public class GenerateResults {
 
             records.add(new String[] {
                     String.valueOf(iteration),
-                    String.valueOf(solution.satisfiedClauses(clausesSet, null))
+                    String.valueOf(solution.countSatisfiedClauses(clausesSet, null))
             });
         }
 
@@ -242,7 +242,7 @@ public class GenerateResults {
 
             records.add(new String[] {
                 String.valueOf(size),
-                String.valueOf(solution.satisfiedClauses(clausesSet, null))
+                String.valueOf(solution.countSatisfiedClauses(clausesSet, null))
             });
         }
 
@@ -272,7 +272,7 @@ public class GenerateResults {
 
             records.add(new String[] {
                 String.valueOf(crossoverRate),
-                String.valueOf(solution.satisfiedClauses(clausesSet, null))
+                String.valueOf(solution.countSatisfiedClauses(clausesSet, null))
             });
         }
 
@@ -302,7 +302,7 @@ public class GenerateResults {
 
             records.add(new String[] {
                 String.valueOf(mutationRate),
-                String.valueOf(solution.satisfiedClauses(clausesSet, null))
+                String.valueOf(solution.countSatisfiedClauses(clausesSet, null))
             });
         }
 

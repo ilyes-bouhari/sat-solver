@@ -34,9 +34,7 @@ public class Literal implements Comparable<Literal> {
 
     @Override
     public int compareTo(Literal anotherLiteral) {
-        if (this.getProbability() > anotherLiteral.getProbability()) return 1;
-        if (this.getProbability() < anotherLiteral.getProbability()) return -1;
+        return Double.compare(this.getProbability(), anotherLiteral.getProbability());
 
-        return 0;
     }
 }

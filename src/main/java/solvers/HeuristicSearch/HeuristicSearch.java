@@ -51,13 +51,13 @@ public class HeuristicSearch {
 
             solution.update(reconstructPath(currentNode));
 
-            if(solution.satisfiedClauses(clausesSet, null) > bestSolution.satisfiedClauses(clausesSet, null))
+            if(solution.countSatisfiedClauses(clausesSet, null) > bestSolution.countSatisfiedClauses(clausesSet, null))
                 bestSolution = new Solution(solution);
 
             if (launchPanel != null) launchPanel.getSummaryPanel().updateSummary(clausesSet, bestSolution);
             if (solutionPanel != null) solutionPanel.setSolution(bestSolution);
 
-            boolean response = bestSolution.isSolution(clausesSet, clausesPanel != null ? clausesPanel.getTableModel() : null);
+            boolean response = bestSolution.isTargetReached(clausesSet, clausesPanel != null ? clausesPanel.getTableModel() : null);
             if (response) break;
 
             if (currentNode.getChildren().size() > 0) {

@@ -51,7 +51,7 @@ public class SummaryPanel extends JPanel {
     }
 
     public void updateSummary(ClausesSet clausesSet, Solution solution) {
-        float count = solution.satisfiedClauses(clausesSet, null);
+        float count = solution.countSatisfiedClauses(clausesSet, null);
         satisfiedClauses.setText(getText(clausesSet, count));
 
         count = clausesSet.getNumberOfClause() - count;

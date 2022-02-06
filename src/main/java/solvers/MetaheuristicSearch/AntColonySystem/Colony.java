@@ -13,10 +13,7 @@ public class Colony {
 
     private final ClausesSet clausesSet;
     private final ClausesPanel clausesPanel;
-    private HashMap<Integer, Literal> literals;
-    private Solution solution;
     private final common.Solution baseSolution;
-    private ArrayList<Literal> tempLiterals = new ArrayList<>();
 
     private final double alpha;
     private final double beta;
@@ -25,9 +22,25 @@ public class Colony {
     private final int maxIterations;
     private final int numberOfAnts;
     private final double q0;
-    HashMap<Integer, Double> pheromone = new HashMap<>();
+    private final int maxStep;
 
-    Colony(ClausesSet clausesSet, ClausesPanel clausesPanel, common.Solution baseSolution, double alpha, double beta, int maxIterations, int numberOfAnts, double pheromoneInit, double evaporationRate, double q0) {
+    private ArrayList<Literal> tempLiterals = new ArrayList<>();
+    private HashMap<Integer, Literal> literals = new HashMap<>();
+    private HashMap<Integer, Double> pheromone = new HashMap<>();
+
+    Colony(
+        ClausesSet clausesSet,
+        ClausesPanel clausesPanel,
+        common.Solution baseSolution,
+        double alpha,
+        double beta,
+        int maxIterations,
+        int numberOfAnts,
+        double pheromoneInit,
+        double evaporationRate,
+        double q0,
+        int maxStep
+    ) {
         this.clausesSet = clausesSet;
         this.clausesPanel = clausesPanel;
         this.baseSolution = baseSolution;
@@ -38,35 +51,37 @@ public class Colony {
         this.pheromoneInit = pheromoneInit;
         this.evaporationRate = evaporationRate;
         this.q0 = q0;
+        this.maxStep = maxStep;
     }
 
     public Solution run() {
 
-        Solution solution = new Solution(clausesSet.getNumberOfVariables());
-        Solution bestSolution = new Solution(solution);
+        Solution solution;
+        Solution bestSolution = new Solution(clausesSet.getNumberOfVariables());
 
         for (int i = 0; i < maxIterations; i++) {
 
             ArrayList<Ant> ants = new ArrayList<>();
             for (int j = 0; j < numberOfAnts; j++) {
+
                 solution = constructSolution();
-                solution.satisfiedClauses(clausesSet, null);
+                solution.countSatisfiedClauses(clausesSet, null);
                 solution = new Solution(improveSearch(solution));
-                int evaluateSolution = solution.satisfiedClauses(clausesSet, null);
+                int evaluateSolution = solution.countSatisfiedClauses(clausesSet, null);
+
                 onlineStepByStepPheromoneUpdate(solution);
                 ants.add(new Ant(solution, evaluateSolution));
             }
+
             ants.sort(Collections.reverseOrder());
             offlineStepByStepPheromoneUpdate(ants.get(0).getSolution(), ants.get(0).getSatisfiedClauses());
 
-            if(ants.get(0).getSatisfiedClauses() > bestSolution.satisfiedClauses(clausesSet, null))
+            if(ants.get(0).getSatisfiedClauses() > bestSolution.countSatisfiedClauses(clausesSet, null))
                 bestSolution = new Solution(ants.get(0).getSolution());
 
 
-            boolean response = bestSolution.isSolution(clausesSet, clausesPanel != null ? clausesPanel.getTableModel() : null);
+            boolean response = bestSolution.isTargetReached(clausesSet, clausesPanel != null ? clausesPanel.getTableModel() : null);
             if (response) break;
-
-            System.out.println("Best : " + bestSolution.satisfiedClauses(clausesSet, null));
         }
 
         return bestSolution;
@@ -75,8 +90,9 @@ public class Colony {
     Solution constructSolution() {
 
         Literal literal;
-        literals = generateSetOfLiterals();
-        solution = new Solution(baseSolution);
+
+        generateSetOfLiterals();
+        Solution solution = new Solution(baseSolution);
 
         while (literals.size() > 0) {
             literal = nextLiteral();
@@ -88,20 +104,10 @@ public class Colony {
         return solution;
     }
 
-    void onlineStepByStepPheromoneUpdate(Solution solution) {
-        for (int i = 0; i < solution.getSolutionSize(); i++) {
-            int literal = solution.getLiteral(i);
-            pheromone.put(
-                literal,
-                ((1 - evaporationRate) * pheromone.get(literal)) + (evaporationRate * pheromoneInit)
-            );
-        }
-    }
-
     Solution improveSearch(Solution solution) {
 
         Solution tempSolution = new Solution(solution);
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < maxStep; i++) {
 
             if (solution.getUnsatisfiedClauses().size() == 0) break;
 
@@ -109,7 +115,7 @@ public class Colony {
             int randomLiteral = ThreadLocalRandom.current().nextInt(0, tempSolution.getUnsatisfiedClauses().get(randomClause).getNumberOfLiterals());
             randomLiteral = solution.getUnsatisfiedClauses().get(randomClause).getLiteral(randomLiteral);
             tempSolution.invertLiteral(Math.abs(randomLiteral)-1);
-            if (solution.satisfiedClauses(clausesSet, null) < tempSolution.satisfiedClauses(clausesSet, null)) {
+            if (solution.countSatisfiedClauses(clausesSet, null) < tempSolution.countSatisfiedClauses(clausesSet, null)) {
                 solution = new Solution(tempSolution);
                 tempSolution = new Solution(solution);
             }
@@ -118,23 +124,30 @@ public class Colony {
         return solution;
     }
 
+    void onlineStepByStepPheromoneUpdate(Solution solution) {
+        updatePheromone(solution, evaporationRate * pheromoneInit);
+    }
+
     void offlineStepByStepPheromoneUpdate(Solution solution, int gain) {
-        for (int i = 0; i < solution.getSolutionSize(); i++) {
+        updatePheromone(solution, evaporationRate * gain);
+    }
+
+    void updatePheromone(Solution solution, double v) {
+        for (int i = 0; i < solution.getSize(); i++) {
             int literal = solution.getLiteral(i);
             pheromone.put(
                 literal,
-                ((1 - evaporationRate) * pheromone.get(literal)) + (evaporationRate * gain)
+                ((1 - evaporationRate) * pheromone.get(literal)) + (v)
             );
         }
     }
 
-    HashMap<Integer, Literal> generateSetOfLiterals() {
+    void generateSetOfLiterals() {
 
         int literal;
         ArrayList<Integer> variables = new ArrayList<>();
-        HashMap<Integer, Literal> literals = new HashMap<>();
 
-        for (int i = 0; i < baseSolution.getSolutionSize(); i++) {
+        for (int i = 0; i < baseSolution.getSize(); i++) {
             if (baseSolution.getLiteral(i) != 0) {
                 variables.add(i+1);
             }
@@ -157,8 +170,6 @@ public class Colony {
                 pheromone.put(-literal, pheromoneInit);
             }
         }
-
-        return literals;
     }
 
     public int calculateHeuristic(int l) {
@@ -168,8 +179,9 @@ public class Colony {
 
         for (int i = 0; i < clausesSet.getNumberOfClause(); i++) {
 
-            for (int j = 0; j < clausesSet.getClause(i).getNumberOfLiterals(); j++) {
-                literal = clausesSet.getClause(i).getLiteral(j);
+            Clause clause = clausesSet.getClause(i);
+            for (int j = 0; j < clause.getNumberOfLiterals(); j++) {
+                literal = clause.getLiteral(j);
 
                 if (literal == l) {
                     counter++;
@@ -248,7 +260,7 @@ public class Colony {
     public static void main(String[] args) {
 
         ClausesPanel clausesPanel = new ClausesPanel();
-        clausesPanel.loadClausesSet(GenerateResults.class.getResourceAsStream("/uf75-325/uf75-03.cnf"));
+        clausesPanel.loadClausesSet(GenerateResults.class.getResourceAsStream("/uf75-325/uf75-05.cnf"));
 
         common.Solution solution = (new HeuristicSearch(
             clausesPanel.getClausesSet(),
@@ -259,10 +271,12 @@ public class Colony {
             null
         )).AStar();
 
-        System.out.println("A* : " + solution.satisfiedClauses(clausesPanel.getClausesSet(), null));
+        System.out.println("A* : " + solution.countSatisfiedClauses(clausesPanel.getClausesSet(), null));
+        System.out.println("A* : " + solution);
+        Colony colony = new Colony(clausesPanel.getClausesSet(), null, solution, .1, .1 , 2000, 10, .1,.3, .7, 60);
 
-        Colony colony = new Colony(clausesPanel.getClausesSet(), null, solution, .1, .1 , 1000, 2, .1,.1, .7);
-
-        System.out.println(colony.run());
+        solution = colony.run();
+        System.out.println("ACS : " + solution);
+        System.out.println("ACS : " + solution.countSatisfiedClauses(clausesPanel.getClausesSet(), null));
     }
 }

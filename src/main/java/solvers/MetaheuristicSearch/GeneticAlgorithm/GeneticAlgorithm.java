@@ -116,7 +116,7 @@ public class GeneticAlgorithm {
             if (launchPanel != null) launchPanel.getSummaryPanel().updateSummary(clausesSet, bestIndividual.getSolution());
             if (solutionPanel != null) solutionPanel.setSolution(bestIndividual.getSolution());
 
-            boolean response = bestIndividual.getSolution().isSolution(clausesSet, clausesPanel != null ? clausesPanel.getTableModel() : null);
+            boolean response = bestIndividual.getSolution().isTargetReached(clausesSet, clausesPanel != null ? clausesPanel.getTableModel() : null);
             if (response) break;
 
             // System.out.println(bestIndividual.getFitness());
