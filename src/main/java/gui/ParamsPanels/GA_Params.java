@@ -8,15 +8,13 @@ import utils.ItemComboBoxRenderer;
 import java.awt.*;
 import javax.swing.*;
 import javax.swing.border.Border;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.stream.IntStream;
 import javax.swing.event.ChangeEvent;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.CompoundBorder;
 import javax.swing.event.ChangeListener;
 
-public class GA extends JPanel {
+public class GA_Params extends JPanel {
 
     private JSpinner populationSizeSpinner;
     private JSpinner maxIterationSpinner;
@@ -24,7 +22,7 @@ public class GA extends JPanel {
     private JComboBox mutationRateComboBox;
     private ButtonGroup stoppingCriteriaButtonGroup;
 
-    public GA(LaunchPanel launchPanel) {
+    public GA_Params(LaunchPanel launchPanel) {
         setupUI();
         setupListeners();
     }

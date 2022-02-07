@@ -1,70 +1,60 @@
 package solvers.MetaheuristicSearch.AntColonySystem;
 
 import java.util.*;
+import lombok.RequiredArgsConstructor;
 import java.util.concurrent.ThreadLocalRandom;
 
+import tasks.ACSTask;
 import common.Clause;
+import gui.LaunchPanel;
 import gui.ClausesPanel;
 import common.ClausesSet;
 import command.GenerateResults;
 import solvers.HeuristicSearch.HeuristicSearch;
 
-public class Colony {
+@RequiredArgsConstructor
+public class ACS {
 
-    private final ClausesSet clausesSet;
-    private final ClausesPanel clausesPanel;
+    private final LaunchPanel launchPanel;
     private final common.Solution baseSolution;
 
     private final double alpha;
     private final double beta;
-    private final double pheromoneInit;
-    private final double evaporationRate;
     private final int maxIterations;
     private final int numberOfAnts;
+    private final double pheromoneInit;
+    private final double evaporationRate;
     private final double q0;
     private final int maxStep;
 
-    private ArrayList<Literal> tempLiterals = new ArrayList<>();
-    private HashMap<Integer, Literal> literals = new HashMap<>();
-    private HashMap<Integer, Double> pheromone = new HashMap<>();
+    private final ACSTask task;
 
-    Colony(
-        ClausesSet clausesSet,
-        ClausesPanel clausesPanel,
-        common.Solution baseSolution,
-        double alpha,
-        double beta,
-        int maxIterations,
-        int numberOfAnts,
-        double pheromoneInit,
-        double evaporationRate,
-        double q0,
-        int maxStep
-    ) {
-        this.clausesSet = clausesSet;
-        this.clausesPanel = clausesPanel;
-        this.baseSolution = baseSolution;
-        this.alpha = alpha;
-        this.beta = beta;
-        this.maxIterations = maxIterations;
-        this.numberOfAnts = numberOfAnts;
-        this.pheromoneInit = pheromoneInit;
-        this.evaporationRate = evaporationRate;
-        this.q0 = q0;
-        this.maxStep = maxStep;
-    }
+    private ClausesSet clausesSet;
+
+    private final ArrayList<Literal> tempLiterals = new ArrayList<>();
+    private final HashMap<Integer, Literal> literals = new HashMap<>();
+    private final HashMap<Integer, Double> pheromone = new HashMap<>();
 
     public Solution run() {
 
-        Solution solution;
+        ClausesPanel clausesPanel = launchPanel.getClausesPanel();
+        clausesSet = clausesPanel.getClausesSet();
+
         Solution bestSolution = new Solution(clausesSet.getNumberOfVariables());
 
+        long startTime = System.currentTimeMillis();
+
         for (int i = 0; i < maxIterations; i++) {
+
+            if (
+                ((System.currentTimeMillis() - startTime)/1000) >= launchPanel.getExecutionTimeInSeconds() ||
+                (task != null && (task.isCancelled() || task.isDone()))
+            ) break;
 
             ArrayList<Ant> ants = new ArrayList<>();
             for (int j = 0; j < numberOfAnts; j++) {
 
-                solution = constructSolution();
+                Solution solution = constructSolution();
                 solution.countSatisfiedClauses(clausesSet, null);
                 solution = new Solution(improveSearch(solution));
                 int evaluateSolution = solution.countSatisfiedClauses(clausesSet, null);
@@ -74,13 +64,17 @@ public class Colony {
             }
 
             ants.sort(Collections.reverseOrder());
-            offlineStepByStepPheromoneUpdate(ants.get(0).getSolution(), ants.get(0).getSatisfiedClauses());
+            Ant bestAnt = ants.get(0);
 
-            if(ants.get(0).getSatisfiedClauses() > bestSolution.countSatisfiedClauses(clausesSet, null))
-                bestSolution = new Solution(ants.get(0).getSolution());
+            offlineStepByStepPheromoneUpdate(bestAnt.getSolution(), bestAnt.getSatisfiedClauses());
 
+            if(bestAnt.getSatisfiedClauses() > bestSolution.countSatisfiedClauses(clausesSet, null))
+                bestSolution = new Solution(bestAnt.getSolution());
 
-            boolean response = bestSolution.isTargetReached(clausesSet, clausesPanel != null ? clausesPanel.getTableModel() : null);
+            if (task != null) launchPanel.getSummaryPanel().updateSummary(clausesSet, bestSolution);
+            if (task != null) launchPanel.getSolutionPanel().setSolution(bestSolution);
+
+            boolean response = bestSolution.isTargetReached(clausesSet, task != null ? clausesPanel.getTableModel() : null);
             if (response) break;
         }
 
@@ -260,7 +254,7 @@ public class Colony {
     public static void main(String[] args) {
 
         ClausesPanel clausesPanel = new ClausesPanel();
-        clausesPanel.loadClausesSet(GenerateResults.class.getResourceAsStream("/uf75-325/uf75-05.cnf"));
+        clausesPanel.loadClausesSet(GenerateResults.class.getResourceAsStream("/uf75-325/uf75-01.cnf"));
 
         common.Solution solution = (new HeuristicSearch(
             clausesPanel.getClausesSet(),
@@ -273,9 +267,14 @@ public class Colony {
 
         System.out.println("A* : " + solution.countSatisfiedClauses(clausesPanel.getClausesSet(), null));
         System.out.println("A* : " + solution);
-        Colony colony = new Colony(clausesPanel.getClausesSet(), null, solution, .1, .1 , 2000, 10, .1,.3, .7, 60);
 
-        solution = colony.run();
+        LaunchPanel launchPanel = new LaunchPanel();
+        launchPanel.setClausesPanel(clausesPanel);
+        launchPanel.setExecutionTimeInSeconds(60);
+
+        ACS acs = new ACS(launchPanel, solution, .1, .1 , 2000, 10, .1,.3, .7, 60, null);
+
+        solution = acs.run();
         System.out.println("ACS : " + solution);
         System.out.println("ACS : " + solution.countSatisfiedClauses(clausesPanel.getClausesSet(), null));
     }

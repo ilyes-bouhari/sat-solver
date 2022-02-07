@@ -2,6 +2,7 @@ package gui;
 
 import common.Clause;
 import common.ClausesSet;
+import lombok.Setter;
 import utils.CustomTableCellRenderer;
 
 import java.awt.*;
@@ -20,7 +21,7 @@ public class ClausesPanel extends JPanel {
 
     private LaunchPanel launchPanel;
     private JTable clausesTable;
-    private ClausesSet clausesSet;
+    @Setter  private ClausesSet clausesSet;
     private JButton loadClausesButton;
     private DefaultTableModel tableModel;
 

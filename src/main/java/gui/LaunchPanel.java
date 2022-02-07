@@ -5,19 +5,26 @@ import javax.swing.*;
 import common.ClausesSet;
 import enums.Solvers;
 import enums.StoppingCriteria;
+import gui.ParamsPanels.ACS_Params;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+import tasks.ACSTask;
 import tasks.AStarTask;
 import tasks.DepthFirstSearchTask;
 import tasks.GeneticAlgorithmTask;
 import utils.ComboBoxItem;
-import utils.ItemComboBoxRenderer;
 
 import javax.swing.border.Border;
 import java.awt.event.ActionEvent;
+import java.util.Objects;
 import java.util.stream.IntStream;
 import java.awt.event.ActionListener;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.CompoundBorder;
 
+@Getter
+@Setter
 public class LaunchPanel extends JPanel {
 
     private ClausesPanel clausesPanel;
@@ -25,16 +32,28 @@ public class LaunchPanel extends JPanel {
     private SummaryPanel summaryPanel;
     private SolutionPanel solutionPanel;
 
+    @Setter(AccessLevel.NONE)
     private JButton launchButton;
-    private JComboBox executionTimeComboBox;
-    private SwingWorker task;
 
-    private ClausesSet clausesSet;
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
+    private JComboBox executionTimeComboBox;
+
+    @Setter(AccessLevel.NONE)
+    private SwingWorker<Object, Void> task;
     private int executionTimeInSeconds;
 
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
     private boolean isRunning = false;
+
+    @Getter(AccessLevel.NONE)
     private boolean clausesLoaded = false;
+
+    @Getter(AccessLevel.NONE)
     private boolean solverChosen = false;
+
+    @Getter(AccessLevel.NONE)
     private boolean executionTimeIsSet = false;
 
     public LaunchPanel() {
@@ -61,9 +80,7 @@ public class LaunchPanel extends JPanel {
 
         gridBagConstraints = new GridBagConstraints();
         ComboBoxItem[] range = IntStream.iterate(0, i -> i + 60).limit(61).boxed()
-            .filter(time -> time != 0).map(time -> {
-                return new ComboBoxItem(String.valueOf(time), String.valueOf(time/60) + " min");
-            }).toArray(ComboBoxItem[]::new);
+            .filter(time -> time != 0).map(time -> new ComboBoxItem(String.valueOf(time), time / 60 + " min")).toArray(ComboBoxItem[]::new);
 
         executionTimeComboBox = new JComboBox(range);
         gridBagConstraints.fill = GridBagConstraints.BOTH;
@@ -106,65 +123,42 @@ public class LaunchPanel extends JPanel {
 
                     toggleOnRunning(true);
 
-                    Solvers solver = Solvers.valueOf(((ComboBoxItem) solversPanel.getSolversComboBox().getSelectedItem()).getId());
-                    executionTimeInSeconds = Integer.parseInt(((ComboBoxItem) executionTimeComboBox.getSelectedItem()).getId());
-                    clausesSet = clausesPanel.getClausesSet();
+                    Solvers solver = getChosenSolver();
+                    setExecutionTimeInSeconds(getChosenExecutionTime());
+                    ClausesSet clausesSet = clausesPanel.getClausesSet();
 
                     switch (solver) {
-                        case DFS:
-                            task = new DepthFirstSearchTask(clausesSet, clausesPanel, solutionPanel, executionTimeInSeconds, launchPanel);
-                            task.execute();
+                        case DFS: {
+
+                            (task = new DepthFirstSearchTask(
+                                clausesSet,
+                                clausesPanel,
+                                solutionPanel,
+                                executionTimeInSeconds,
+                                launchPanel
+                            )).execute();
                             break;
-                        case AStar:
-                            task = new AStarTask(clausesSet, clausesPanel, solutionPanel, executionTimeInSeconds, launchPanel);
-                            task.execute();
-                            break;
-                        case GA:
-                            int populationSize = (int) solversPanel.getGaParamsPanel().getPopulationSizeSpinner().getValue();
-                            int maxIteration = (int) solversPanel.getGaParamsPanel().getMaxIterationSpinner().getValue();
-
-                            int crossoverRate = Integer.parseInt(((ComboBoxItem) solversPanel.getGaParamsPanel().getCrossoverRateComboBox().getSelectedItem()).getId());
-                            int mutationRate = Integer.parseInt(((ComboBoxItem) solversPanel.getGaParamsPanel().getMutationRateComboBox().getSelectedItem()).getId());
-
-                            StoppingCriteria stoppingCriteria = StoppingCriteria.valueOf(solversPanel.getGaParamsPanel().getStoppingCriteriaButtonGroup().getSelection().getActionCommand());
-
-                            task = new GeneticAlgorithmTask(
-                                    clausesSet,
-                                    clausesPanel,
-                                    solutionPanel,
-                                    launchPanel,
-
-                                    populationSize,
-                                    maxIteration,
-                                    crossoverRate,
-                                    mutationRate,
-                                    stoppingCriteria,
-                                    executionTimeInSeconds
-                            );
-                            task.execute();
-                            break;
-                    }
-
-                    /*switch (solver) {
-                        case DFS -> {
-                            task = new DepthFirstSearchTask(clausesSet, clausesPanel, solutionPanel, executionTimeInSeconds, launchPanel);
-                            task.execute();
                         }
-                        case AStar -> {
-                            task = new AStarTask(clausesSet, clausesPanel, solutionPanel, executionTimeInSeconds, launchPanel);
-                            task.execute();
+                        case AStar: {
+
+                            (task = new AStarTask(
+                                clausesSet,
+                                clausesPanel,
+                                solutionPanel,
+                                executionTimeInSeconds,
+                                launchPanel
+                            )).execute();
+                            break;
                         }
-                        case GA -> {
+                        case GA: {
 
-                            int populationSize = (int) solversPanel.getGaParamsPanel().getPopulationSizeSpinner().getValue();
-                            int maxIteration = (int) solversPanel.getGaParamsPanel().getMaxIterationSpinner().getValue();
+                            int populationSize = getChosenPopulationSize();
+                            int maxIteration = getChosenMaxIterations();
+                            int crossoverRate = getChosenCrossoverRate();
+                            int mutationRate = getChosenMutationRate();
+                            StoppingCriteria stoppingCriteria = getChosenStoppingCriteria();
 
-                            int crossoverRate = Integer.parseInt(((ComboBoxItem) solversPanel.getGaParamsPanel().getCrossoverRateComboBox().getSelectedItem()).getId());
-                            int mutationRate = Integer.parseInt(((ComboBoxItem) solversPanel.getGaParamsPanel().getMutationRateComboBox().getSelectedItem()).getId());
-
-                            StoppingCriteria stoppingCriteria = StoppingCriteria.valueOf(solversPanel.getGaParamsPanel().getStoppingCriteriaButtonGroup().getSelection().getActionCommand());
-
-                            task = new GeneticAlgorithmTask(
+                            (task = new GeneticAlgorithmTask(
                                 clausesSet,
                                 clausesPanel,
                                 solutionPanel,
@@ -176,10 +170,35 @@ public class LaunchPanel extends JPanel {
                                 mutationRate,
                                 stoppingCriteria,
                                 executionTimeInSeconds
-                            );
-                            task.execute();
+                            )).execute();
+                            break;
                         }
-                    }*/
+                        case ACS: {
+
+                            ACS_Params acs_params = solversPanel.getAcsParamsPanel();
+                            double alpha = (double) acs_params.getAlphaSpinner().getValue();
+                            double beta = (double) acs_params.getBetaSpinner().getValue();
+                            int maxIterations = (int) acs_params.getMaxIterationsSpinner().getValue();
+                            int numberOfAnts = (int) acs_params.getNumberOfAntsSpinner().getValue();
+                            double pheromoneInit = (double) acs_params.getPheromoneInitSpinner().getValue();
+                            double evaporationRate = (double) acs_params.getEvaporationRateSpinner().getValue();
+                            double q0 = (double) acs_params.getQ0Spinner().getValue();
+                            int maxStep = (int) acs_params.getMaxStepSpinner().getValue();
+
+                            (task = new ACSTask(
+                                launchPanel,
+                                alpha,
+                                beta,
+                                maxIterations,
+                                numberOfAnts,
+                                pheromoneInit,
+                                evaporationRate,
+                                q0,
+                                maxStep
+                            )).execute();
+                            break;
+                        }
+                    }
                 } else {
 
                     launchButton.setEnabled(false);
@@ -195,8 +214,7 @@ public class LaunchPanel extends JPanel {
     }
 
     public void enableLaunchButton() {
-        if (clausesLoaded) launchButton.setEnabled(true);
-        else launchButton.setEnabled(false);
+        launchButton.setEnabled(clausesLoaded);
     }
 
     public void toggleOnRunning(boolean isRunning) {
@@ -213,35 +231,37 @@ public class LaunchPanel extends JPanel {
         launchButton.setText(isRunning ? "STOP ( Running... )" : "Launch");
     }
 
-    public void setClausesLoaded(boolean clausesLoaded) {
-        this.clausesLoaded = clausesLoaded;
+    private Solvers getChosenSolver() {
+        return Solvers.valueOf(((ComboBoxItem) Objects.requireNonNull(solversPanel.getSolversComboBox().getSelectedItem())).getId());
     }
 
-    public void setSolverChosen(boolean solverChosen) {
-        this.solverChosen = solverChosen;
+    private int getChosenExecutionTime() {
+        return Integer.parseInt(((ComboBoxItem) Objects.requireNonNull(executionTimeComboBox.getSelectedItem())).getId());
     }
 
-    public void setExecutionTimeIsSet(boolean executionTimeIsSet) {
-        this.executionTimeIsSet = executionTimeIsSet;
+    private int getChosenPopulationSize() {
+        return (int) solversPanel.getGaParamsPanel().getPopulationSizeSpinner().getValue();
     }
 
-    public void setClausesPanel(ClausesPanel clausesPanel) {
-        this.clausesPanel = clausesPanel;
+    private int getChosenMaxIterations() {
+        return (int) solversPanel.getGaParamsPanel().getMaxIterationSpinner().getValue();
     }
 
-    public void setSolversPanel(SolversPanel solversPanel) {
-        this.solversPanel = solversPanel;
+    private int getChosenCrossoverRate() {
+        return Integer.parseInt(
+            ((ComboBoxItem) Objects.requireNonNull(solversPanel.getGaParamsPanel().getCrossoverRateComboBox().getSelectedItem())
+        ).getId());
     }
 
-    public SummaryPanel getSummaryPanel() {
-        return summaryPanel;
+    private int getChosenMutationRate() {
+        return Integer.parseInt(
+            ((ComboBoxItem) Objects.requireNonNull(solversPanel.getGaParamsPanel().getMutationRateComboBox().getSelectedItem())
+        ).getId());
     }
 
-    public void setSummaryPanel(SummaryPanel summaryPanel) {
-        this.summaryPanel = summaryPanel;
-    }
-
-    public void setSolutionPanel(SolutionPanel solutionPanel) {
-        this.solutionPanel = solutionPanel;
+    private StoppingCriteria getChosenStoppingCriteria() {
+        return StoppingCriteria.valueOf(
+            solversPanel.getGaParamsPanel().getStoppingCriteriaButtonGroup().getSelection().getActionCommand()
+        );
     }
 }

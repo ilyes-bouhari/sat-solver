@@ -1,7 +1,9 @@
 package gui;
 
 import enums.Solvers;
-import gui.ParamsPanels.GA;
+import gui.ParamsPanels.ACS_Params;
+import gui.ParamsPanels.GA_Params;
+import lombok.Getter;
 import utils.ComboBoxItem;
 
 import java.awt.*;
@@ -13,10 +15,12 @@ import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.CompoundBorder;
 
+@Getter
 public class SolversPanel extends JPanel {
 
     private LaunchPanel launchPanel;
-    private GA gaParamsPanel;
+    private GA_Params gaParamsPanel;
+    private ACS_Params acsParamsPanel;
     private JComboBox solversComboBox;
 
     public SolversPanel() {
@@ -37,6 +41,7 @@ public class SolversPanel extends JPanel {
             new ComboBoxItem(String.valueOf(Solvers.DFS), "Depth-First Search (DFS)"),
             new ComboBoxItem(String.valueOf(Solvers.AStar), "A Star (A*)"),
             new ComboBoxItem(String.valueOf(Solvers.GA), "Genetic Algorithm (GA)"),
+            new ComboBoxItem(String.valueOf(Solvers.ACS), "Ant Colony System (ACS)"),
         };
 
         solversComboBox = new JComboBox(solvers);
@@ -51,7 +56,7 @@ public class SolversPanel extends JPanel {
         add(solversComboBox, gridBagConstraints);
 
         gridBagConstraints = new GridBagConstraints();
-        gaParamsPanel = new GA(launchPanel);
+        gaParamsPanel = new GA_Params(launchPanel);
         gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = GridBagConstraints.PAGE_START;
         gridBagConstraints.gridx = 0;
@@ -62,6 +67,10 @@ public class SolversPanel extends JPanel {
         gridBagConstraints.insets = new Insets(10, 0, 0, 0);
         add(gaParamsPanel, gridBagConstraints);
         gaParamsPanel.setVisible(false);
+
+        acsParamsPanel = new ACS_Params();
+        add(acsParamsPanel, gridBagConstraints);
+        acsParamsPanel.setVisible(false);
     }
 
     public void setupListeners() {
@@ -75,17 +84,17 @@ public class SolversPanel extends JPanel {
                 hideAllParamsPanels();
                 resetParams();
 
-                if (solver == Solvers.GA) {
-                    gaParamsPanel.setVisible(true);
+                switch (solver) {
+                    case GA: gaParamsPanel.setVisible(true); break;
+                    case ACS: acsParamsPanel.setVisible(true); break;
                 }
             }
         });
     }
 
-    // TODO : set solver time of execution by default
-
     public void hideAllParamsPanels() {
         gaParamsPanel.setVisible(false);
+        acsParamsPanel.setVisible(false);
     }
 
     public void resetParams() {
@@ -94,7 +103,7 @@ public class SolversPanel extends JPanel {
 
     public JComboBox getSolversComboBox() { return this.solversComboBox; }
 
-    public GA getGaParamsPanel() {
+    public GA_Params getGaParamsPanel() {
         return gaParamsPanel;
     }
 
