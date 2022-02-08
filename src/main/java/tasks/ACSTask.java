@@ -21,16 +21,14 @@ public class ACSTask extends SwingWorker<Object, Void> {
     private final double evaporationRate;
     private final double q0;
     private final int maxStep;
+    private final int executionTimeInSeconds;
 
     @Override
     protected Object doInBackground() {
 
         Solution baseSolution = (new HeuristicSearch(
-            launchPanel.getClausesPanel().getClausesSet(),
-            null,
-            null,
+            launchPanel,
             1,
-            null,
             null
         )).AStar();
 
@@ -45,6 +43,7 @@ public class ACSTask extends SwingWorker<Object, Void> {
             evaporationRate,
             q0,
             maxStep,
+            executionTimeInSeconds,
             this
         ).run());
     }

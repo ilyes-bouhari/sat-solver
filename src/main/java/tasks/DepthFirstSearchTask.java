@@ -1,38 +1,28 @@
 package tasks;
 
-import common.ClausesSet;
-import gui.ClausesPanel;
 import gui.LaunchPanel;
-import gui.SolutionPanel;
 import solvers.BlindSearch.BlindSearch;
 
 import javax.swing.*;
 
 public class DepthFirstSearchTask extends SwingWorker<Object, Void> {
 
-    private ClausesSet clausesSet;
-    private ClausesPanel clausesPanel;
     private int executionTimeInSeconds;
     private LaunchPanel launchPanel;
-    private SolutionPanel solutionPanel;
 
-    public DepthFirstSearchTask(ClausesSet clausesSet, ClausesPanel clausesPanel, SolutionPanel solutionPanel, int executionTimeInSeconds, LaunchPanel launchPanel) {
-        this.clausesSet = clausesSet;
-        this.clausesPanel = clausesPanel;
-        this.executionTimeInSeconds = executionTimeInSeconds;
+    public DepthFirstSearchTask(LaunchPanel launchPanel, int executionTimeInSeconds) {
         this.launchPanel = launchPanel;
-        this.solutionPanel = solutionPanel;
+        this.executionTimeInSeconds = executionTimeInSeconds;
     }
 
     @Override
-    protected Object doInBackground() throws Exception {
+    protected Object doInBackground() {
 
         (new BlindSearch(
-            clausesSet,
-            clausesPanel,
-            solutionPanel,
-            executionTimeInSeconds, launchPanel, this)
-        ).DepthFirstSearch();
+            launchPanel,
+            executionTimeInSeconds,
+            this
+        )).DepthFirstSearch();
 
         return null;
     }

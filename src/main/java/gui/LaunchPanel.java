@@ -57,7 +57,6 @@ public class LaunchPanel extends JPanel {
     private boolean executionTimeIsSet = false;
 
     public LaunchPanel() {
-
         setupUI();
         setupListeners();
     }
@@ -131,22 +130,16 @@ public class LaunchPanel extends JPanel {
                         case DFS: {
 
                             (task = new DepthFirstSearchTask(
-                                clausesSet,
-                                clausesPanel,
-                                solutionPanel,
-                                executionTimeInSeconds,
-                                launchPanel
+                                launchPanel,
+                                executionTimeInSeconds
                             )).execute();
                             break;
                         }
                         case AStar: {
 
                             (task = new AStarTask(
-                                clausesSet,
-                                clausesPanel,
-                                solutionPanel,
-                                executionTimeInSeconds,
-                                launchPanel
+                                launchPanel,
+                                executionTimeInSeconds
                             )).execute();
                             break;
                         }
@@ -159,11 +152,7 @@ public class LaunchPanel extends JPanel {
                             StoppingCriteria stoppingCriteria = getChosenStoppingCriteria();
 
                             (task = new GeneticAlgorithmTask(
-                                clausesSet,
-                                clausesPanel,
-                                solutionPanel,
                                 launchPanel,
-
                                 populationSize,
                                 maxIteration,
                                 crossoverRate,
@@ -194,7 +183,8 @@ public class LaunchPanel extends JPanel {
                                 pheromoneInit,
                                 evaporationRate,
                                 q0,
-                                maxStep
+                                maxStep,
+                                executionTimeInSeconds
                             )).execute();
                             break;
                         }
@@ -228,6 +218,17 @@ public class LaunchPanel extends JPanel {
         solversPanel.getGaParamsPanel().getMaxIterationSpinner().setEnabled(!isRunning);
         solversPanel.getGaParamsPanel().getCrossoverRateComboBox().setEnabled(!isRunning);
         solversPanel.getGaParamsPanel().getMutationRateComboBox().setEnabled(!isRunning);
+        solversPanel.getGaParamsPanel().getExecutionTimeRadioButton().setEnabled(!isRunning);
+        solversPanel.getGaParamsPanel().getMaxFitnessRadioButton().setEnabled(!isRunning);
+        solversPanel.getGaParamsPanel().getMaxGenerationsRadioButton().setEnabled(!isRunning);
+        solversPanel.getAcsParamsPanel().getAlphaSpinner().setEnabled(!isRunning);
+        solversPanel.getAcsParamsPanel().getBetaSpinner().setEnabled(!isRunning);
+        solversPanel.getAcsParamsPanel().getMaxIterationsSpinner().setEnabled(!isRunning);
+        solversPanel.getAcsParamsPanel().getNumberOfAntsSpinner().setEnabled(!isRunning);
+        solversPanel.getAcsParamsPanel().getPheromoneInitSpinner().setEnabled(!isRunning);
+        solversPanel.getAcsParamsPanel().getEvaporationRateSpinner().setEnabled(!isRunning);
+        solversPanel.getAcsParamsPanel().getQ0Spinner().setEnabled(!isRunning);
+        solversPanel.getAcsParamsPanel().getMaxStepSpinner().setEnabled(!isRunning);
         launchButton.setText(isRunning ? "STOP ( Running... )" : "Launch");
     }
 

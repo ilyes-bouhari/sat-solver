@@ -1,43 +1,27 @@
 package solvers.HeuristicSearch;
 
-import common.BaseNode;
-
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import java.util.ArrayList;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
+import common.BaseNode;
+
+@Getter
+@Setter
 public class Node extends BaseNode implements Comparable<Node> {
 
-    private int heuristic;
+    private final int heuristic;
     private int cost;
 
-    private Node parent;
+    private final Node parent;
     private ArrayList<Node> children;
 
     public Node(Node parent, int state, int heuristic, int cost) {
         super(state);
         this.parent = parent;
         this.heuristic = heuristic;
-        this.cost = cost;
-    }
-
-    public int getHeuristic() {
-        return heuristic;
-    }
-
-    public Node getParent() {
-        return parent;
-    }
-
-    public void setParent(Node parent) {
-        this.parent = parent;
-    }
-
-    public int getCost() {
-        return cost;
-    }
-
-    public void setCost(int cost) {
         this.cost = cost;
     }
 
@@ -56,19 +40,6 @@ public class Node extends BaseNode implements Comparable<Node> {
     }
 
     @Override
-    public int compareTo(Node anotherNode) {
-        if (this.getFitness() > anotherNode.getFitness()) return 1;
-        if (this.getFitness() < anotherNode.getFitness()) return -1;
-
-        return 0;
-    }
-
-    @Override
-    public String toString() {
-        return "Node ("+ getValue() +"){" + "heuristic=" + heuristic + ", cost=" + cost + ", fitness="+ getFitness() +"}";
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -77,7 +48,12 @@ public class Node extends BaseNode implements Comparable<Node> {
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(getValue());
+    public int compareTo(Node anotherNode) {
+        return Integer.compare(this.getFitness(), anotherNode.getFitness());
+    }
+
+    @Override
+    public String toString() {
+        return "Node ("+ getValue() +"){" + "heuristic=" + heuristic + ", cost=" + cost + ", fitness="+ getFitness() +"}";
     }
 }

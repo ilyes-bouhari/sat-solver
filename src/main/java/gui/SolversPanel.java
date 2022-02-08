@@ -56,7 +56,7 @@ public class SolversPanel extends JPanel {
         add(solversComboBox, gridBagConstraints);
 
         gridBagConstraints = new GridBagConstraints();
-        gaParamsPanel = new GA_Params(launchPanel);
+        gaParamsPanel = new GA_Params();
         gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
         gridBagConstraints.anchor = GridBagConstraints.PAGE_START;
         gridBagConstraints.gridx = 0;

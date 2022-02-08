@@ -13,9 +13,9 @@ public class SummaryPanel extends JPanel {
 
     JLabel satisfiedClauses;
     JLabel nonSatisfiedClauses;
+    JLabel executedIn;
 
     public SummaryPanel() {
-
         setupUI();
     }
 
@@ -35,7 +35,8 @@ public class SummaryPanel extends JPanel {
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.weightx = 1;
-        gridBagConstraints.fill = GridBagConstraints.BOTH;
+        gridBagConstraints.gridwidth = 1;
+        gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
         add(satisfiedClauses, gridBagConstraints);
 
         nonSatisfiedClauses = new JLabel("N/A");
@@ -46,35 +47,33 @@ public class SummaryPanel extends JPanel {
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.weightx = 1;
-        gridBagConstraints.fill = GridBagConstraints.BOTH;
+        gridBagConstraints.gridwidth = 1;
+        gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
         add(nonSatisfiedClauses, gridBagConstraints);
+
+        executedIn = new JLabel("N/A");
+        border = BorderFactory.createTitledBorder("Executed in");
+        executedIn.setBorder(new CompoundBorder(border, margin));
+        executedIn.setFont(new Font("Sans Serif", Font.BOLD, 16));
+        gridBagConstraints.gridx = 2;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.weightx = 1;
+        gridBagConstraints.gridwidth = 1;
+        gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+        add(executedIn, gridBagConstraints);
     }
 
-    public void updateSummary(ClausesSet clausesSet, Solution solution) {
+    public void updateSummary(ClausesSet clausesSet, Solution solution, String executedTimeUntilNowAsString) {
         float count = solution.countSatisfiedClauses(clausesSet, null);
         satisfiedClauses.setText(getText(clausesSet, count));
 
         count = clausesSet.getNumberOfClause() - count;
         nonSatisfiedClauses.setText(getText(clausesSet, count));
+
+        executedIn.setText(executedTimeUntilNowAsString + " seconds");
     }
 
     public String getText(ClausesSet clausesSet, float count) {
         return ((int) count + " clauses = " + String.format("%.2f", (float) (count*100/clausesSet.getNumberOfClause())) + "%");
-    }
-
-    public JLabel getSatisfiedClauses() {
-        return satisfiedClauses;
-    }
-
-    public void setSatisfiedClauses(JLabel satisfiedClauses) {
-        this.satisfiedClauses = satisfiedClauses;
-    }
-
-    public JLabel getNonSatisfiedClauses() {
-        return nonSatisfiedClauses;
-    }
-
-    public void setNonSatisfiedClauses(JLabel nonSatisfiedClauses) {
-        this.nonSatisfiedClauses = nonSatisfiedClauses;
     }
 }

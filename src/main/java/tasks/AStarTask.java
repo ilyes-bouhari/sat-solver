@@ -1,38 +1,26 @@
 package tasks;
 
-import common.ClausesSet;
-import gui.ClausesPanel;
 import gui.LaunchPanel;
-import gui.SolutionPanel;
 import solvers.HeuristicSearch.HeuristicSearch;
 
 import javax.swing.*;
 
 public class AStarTask extends SwingWorker<Object, Void> {
 
-    private ClausesSet clausesSet;
-    private ClausesPanel clausesPanel;
-    private int executionTimeInSeconds;
-    private LaunchPanel launchPanel;
-    private SolutionPanel solutionPanel;
+    private final LaunchPanel launchPanel;
+    private final int executionTimeInSeconds;
 
-    public AStarTask(ClausesSet clausesSet, ClausesPanel clausesPanel, SolutionPanel solutionPanel, int executionTimeInSeconds, LaunchPanel launchPanel) {
-        this.clausesSet = clausesSet;
-        this.clausesPanel = clausesPanel;
-        this.executionTimeInSeconds = executionTimeInSeconds;
+    public AStarTask(LaunchPanel launchPanel, int executionTimeInSeconds) {
         this.launchPanel = launchPanel;
-        this.solutionPanel = solutionPanel;
+        this.executionTimeInSeconds = executionTimeInSeconds;
     }
 
     @Override
-    protected Object doInBackground() throws Exception {
+    protected Object doInBackground() {
 
         (new HeuristicSearch(
-            clausesSet,
-            clausesPanel,
-            solutionPanel,
-            executionTimeInSeconds,
             launchPanel,
+            executionTimeInSeconds,
             this
         )).AStar();
 

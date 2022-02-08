@@ -1,21 +1,18 @@
 package solvers.MetaheuristicSearch.AntColonySystem;
 
 import java.util.*;
-import lombok.RequiredArgsConstructor;
 import java.util.concurrent.ThreadLocalRandom;
 
 import tasks.ACSTask;
 import common.Clause;
 import gui.LaunchPanel;
 import gui.ClausesPanel;
-import common.ClausesSet;
+import solvers.BaseSolver;
 import command.GenerateResults;
 import solvers.HeuristicSearch.HeuristicSearch;
 
-@RequiredArgsConstructor
-public class ACS {
+public class ACS extends BaseSolver {
 
-    private final LaunchPanel launchPanel;
     private final common.Solution baseSolution;
 
     private final double alpha;
@@ -27,37 +24,53 @@ public class ACS {
     private final double q0;
     private final int maxStep;
 
-    private final ACSTask task;
-
-    private ClausesSet clausesSet;
-
     private final ArrayList<Literal> tempLiterals = new ArrayList<>();
     private final HashMap<Integer, Literal> literals = new HashMap<>();
     private final HashMap<Integer, Double> pheromone = new HashMap<>();
 
+    public ACS(
+        LaunchPanel launchPanel,
+        common.Solution baseSolution,
+        double alpha,
+        double beta,
+        int maxIterations,
+        int numberOfAnts,
+        double pheromoneInit,
+        double evaporationRate,
+        double q0,
+        int maxStep,
+        int executionTimeInSeconds,
+        ACSTask task
+    ) {
+        super(launchPanel, executionTimeInSeconds, task);
+        this.baseSolution = baseSolution;
+        this.alpha = alpha;
+        this.beta = beta;
+        this.maxIterations = maxIterations;
+        this.numberOfAnts = numberOfAnts;
+        this.pheromoneInit = pheromoneInit;
+        this.evaporationRate = evaporationRate;
+        this.q0 = q0;
+        this.maxStep = maxStep;
+    }
+
     public Solution run() {
 
-        ClausesPanel clausesPanel = launchPanel.getClausesPanel();
-        clausesSet = clausesPanel.getClausesSet();
+        Solution bestSolution = new Solution(getClausesSet().getNumberOfVariables());
 
-        Solution bestSolution = new Solution(clausesSet.getNumberOfVariables());
-
-        long startTime = System.currentTimeMillis();
+        startTimer();
 
         for (int i = 0; i < maxIterations; i++) {
 
-            if (
-                ((System.currentTimeMillis() - startTime)/1000) >= launchPanel.getExecutionTimeInSeconds() ||
-                (task != null && (task.isCancelled() || task.isDone()))
-            ) break;
+            if (maxProcessingTimeIsReached()) break;
 
             ArrayList<Ant> ants = new ArrayList<>();
             for (int j = 0; j < numberOfAnts; j++) {
 
                 Solution solution = constructSolution();
-                solution.countSatisfiedClauses(clausesSet, null);
+                solution.countSatisfiedClauses(getClausesSet(), null);
                 solution = new Solution(improveSearch(solution));
-                int evaluateSolution = solution.countSatisfiedClauses(clausesSet, null);
+                int evaluateSolution = solution.countSatisfiedClauses(getClausesSet(), null);
 
                 onlineStepByStepPheromoneUpdate(solution);
                 ants.add(new Ant(solution, evaluateSolution));
@@ -68,14 +81,12 @@ public class ACS {
 
             offlineStepByStepPheromoneUpdate(bestAnt.getSolution(), bestAnt.getSatisfiedClauses());
 
-            if(bestAnt.getSatisfiedClauses() > bestSolution.countSatisfiedClauses(clausesSet, null))
+            if(bestAnt.getSatisfiedClauses() > bestSolution.countSatisfiedClauses(getClausesSet(), null))
                 bestSolution = new Solution(bestAnt.getSolution());
 
-            if (task != null) launchPanel.getSummaryPanel().updateSummary(clausesSet, bestSolution);
-            if (task != null) launchPanel.getSolutionPanel().setSolution(bestSolution);
+             updateUI(bestSolution);
 
-            boolean response = bestSolution.isTargetReached(clausesSet, task != null ? clausesPanel.getTableModel() : null);
-            if (response) break;
+            if (targetIsReached(bestSolution)) break;
         }
 
         return bestSolution;
@@ -109,7 +120,7 @@ public class ACS {
             int randomLiteral = ThreadLocalRandom.current().nextInt(0, tempSolution.getUnsatisfiedClauses().get(randomClause).getNumberOfLiterals());
             randomLiteral = solution.getUnsatisfiedClauses().get(randomClause).getLiteral(randomLiteral);
             tempSolution.invertLiteral(Math.abs(randomLiteral)-1);
-            if (solution.countSatisfiedClauses(clausesSet, null) < tempSolution.countSatisfiedClauses(clausesSet, null)) {
+            if (solution.countSatisfiedClauses(getClausesSet(), null) < tempSolution.countSatisfiedClauses(getClausesSet(), null)) {
                 solution = new Solution(tempSolution);
                 tempSolution = new Solution(solution);
             }
@@ -147,9 +158,9 @@ public class ACS {
             }
         }
 
-        for (int i = 0; i < clausesSet.getNumberOfClause(); i++) {
+        for (int i = 0; i < getClausesSet().getNumberOfClause(); i++) {
 
-            Clause clause = clausesSet.getClause(i);
+            Clause clause = getClausesSet().getClause(i);
             for (int j = 0; j < clause.getNumberOfLiterals(); j++) {
                 literal = Math.abs(clause.getLiteral(j));
 
@@ -171,9 +182,9 @@ public class ACS {
         int counter = 0;
         int literal;
 
-        for (int i = 0; i < clausesSet.getNumberOfClause(); i++) {
+        for (int i = 0; i < getClausesSet().getNumberOfClause(); i++) {
 
-            Clause clause = clausesSet.getClause(i);
+            Clause clause = getClausesSet().getClause(i);
             for (int j = 0; j < clause.getNumberOfLiterals(); j++) {
                 literal = clause.getLiteral(j);
 
@@ -193,7 +204,7 @@ public class ACS {
         double sum = 0;
         double q = Math.random();
 
-        loopThroughLiterals(sum);
+        sum = loopThroughLiterals(sum);
         if (q < q0) {
 
             tempLiterals.sort(Collections.reverseOrder());
@@ -201,7 +212,6 @@ public class ACS {
 
         } else {
 
-            sum = tempLiterals.stream().mapToDouble(Literal::getProbability).sum();
             loopThroughLiterals(sum);
             literal = rouletteWheel();
         }
@@ -227,8 +237,9 @@ public class ACS {
         return literal;
     }
 
-    void loopThroughLiterals(double sum) {
+    double loopThroughLiterals(double sum) {
         Literal literal;
+        double tmpSum = 0;
 
         tempLiterals.clear();
         for (Map.Entry<Integer, Literal> entry : literals.entrySet()) {
@@ -239,12 +250,16 @@ public class ACS {
                     Math.pow(getPheromone(literal.getValue()), alpha) *
                     Math.pow(literal.getHeuristic(), beta)
                 );
+
+                tmpSum += literal.getProbability();
             } else {
                 literal.calculateProbability(literal.getProbability() / sum);
             }
 
             tempLiterals.add(literal);
         }
+
+        return tmpSum;
     }
 
     double getPheromone(int literal) {
@@ -256,23 +271,21 @@ public class ACS {
         ClausesPanel clausesPanel = new ClausesPanel();
         clausesPanel.loadClausesSet(GenerateResults.class.getResourceAsStream("/uf75-325/uf75-01.cnf"));
 
+        LaunchPanel launchPanel = new LaunchPanel();
+        launchPanel.setClausesPanel(clausesPanel);
+
         common.Solution solution = (new HeuristicSearch(
-            clausesPanel.getClausesSet(),
-            null,
-            null,
+            launchPanel,
             1,
-            null,
             null
         )).AStar();
 
         System.out.println("A* : " + solution.countSatisfiedClauses(clausesPanel.getClausesSet(), null));
         System.out.println("A* : " + solution);
 
-        LaunchPanel launchPanel = new LaunchPanel();
-        launchPanel.setClausesPanel(clausesPanel);
         launchPanel.setExecutionTimeInSeconds(60);
 
-        ACS acs = new ACS(launchPanel, solution, .1, .1 , 2000, 10, .1,.3, .7, 60, null);
+        ACS acs = new ACS(launchPanel, solution, .1, .1 , 2000, 10, .1,.3, .7, 60, 10, null);
 
         solution = acs.run();
         System.out.println("ACS : " + solution);

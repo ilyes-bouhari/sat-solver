@@ -12,11 +12,7 @@ import tasks.GeneticAlgorithmTask;
 public class MetaheuristicSearch {
 
     public GeneticAlgorithm GeneticAlgorithm(
-        ClausesSet clausesSet,
-        ClausesPanel clausesPanel,
-        SolutionPanel solutionPanel,
         LaunchPanel launchPanel,
-
         int populationSize,
         int maxIterations,
         int crossoverRate,
@@ -27,18 +23,13 @@ public class MetaheuristicSearch {
         GeneticAlgorithmTask task
     ) {
         return new GeneticAlgorithm(
-            clausesSet,
-            clausesPanel,
-            solutionPanel,
             launchPanel,
-
             populationSize,
             maxIterations,
             crossoverRate,
             mutationRate,
             stoppingCriteria,
             executionTimeInSeconds,
-
             task
         );
     }

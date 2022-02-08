@@ -97,11 +97,8 @@ public class GenerateResults {
             case DFS:
 
                 solution = (new BlindSearch(
-                    clausesPanel.getClausesSet(),
-                    null,
                     null,
                     executionTimeInSeconds,
-                    null,
                     null
                 )).DepthFirstSearch();
 
@@ -110,11 +107,8 @@ public class GenerateResults {
             case AStar:
 
                 solution = (new HeuristicSearch(
-                    clausesPanel.getClausesSet(),
-                    null,
                     null,
                     executionTimeInSeconds,
-                    null,
                     null
                 )).AStar();
 
@@ -123,11 +117,7 @@ public class GenerateResults {
             case GA:
 
                 solution = (new MetaheuristicSearch()).GeneticAlgorithm(
-                    clausesPanel.getClausesSet(),
                     null,
-                    null,
-                    null,
-
                     50,
                     4000,
                     50,
@@ -195,19 +185,15 @@ public class GenerateResults {
         for (int iteration : numberOfIterations) {
 
             Solution solution = (new MetaheuristicSearch()).GeneticAlgorithm(
-                    clausesSet,
-                    null,
-                    null,
-                    null,
+                null,
+                50,
+                iteration,
+                50,
+                5,
+                StoppingCriteria.MAX_GENERATION,
+                1,
 
-                    50,
-                    iteration,
-                    50,
-                    5,
-                    StoppingCriteria.MAX_GENERATION,
-                    1,
-
-                    null
+                null
             ).process();
 
             records.add(new String[] {
@@ -225,19 +211,15 @@ public class GenerateResults {
         for (int size : sizeOfPopulations) {
 
             Solution solution = (new MetaheuristicSearch()).GeneticAlgorithm(
-                    clausesSet,
-                    null,
-                    null,
-                    null,
+                null,
+                size,
+                5000,
+                50,
+                5,
+                StoppingCriteria.MAX_GENERATION,
+                1,
 
-                    size,
-                    5000,
-                    50,
-                    5,
-                    StoppingCriteria.MAX_GENERATION,
-                    1,
-
-                    null
+                null
             ).process();
 
             records.add(new String[] {
@@ -255,19 +237,15 @@ public class GenerateResults {
         for (int crossoverRate : crossoverRates) {
 
             Solution solution = (new MetaheuristicSearch()).GeneticAlgorithm(
-                    clausesSet,
-                    null,
-                    null,
-                    null,
+                null,
+                50,
+                5000,
+                crossoverRate,
+                5,
+                StoppingCriteria.MAX_GENERATION,
+                1,
 
-                    50,
-                    5000,
-                    crossoverRate,
-                    5,
-                    StoppingCriteria.MAX_GENERATION,
-                    1,
-
-                    null
+                null
             ).process();
 
             records.add(new String[] {
@@ -285,19 +263,14 @@ public class GenerateResults {
         for (int mutationRate : mutationRates) {
 
             Solution solution = (new MetaheuristicSearch()).GeneticAlgorithm(
-                    clausesSet,
-                    null,
-                    null,
-                    null,
-
-                    50,
-                    5000,
-                    50,
-                    mutationRate,
-                    StoppingCriteria.MAX_GENERATION,
-                    1,
-
-                    null
+                null,
+                50,
+                5000,
+                50,
+                mutationRate,
+                StoppingCriteria.MAX_GENERATION,
+                1,
+                null
             ).process();
 
             records.add(new String[] {

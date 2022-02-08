@@ -1,11 +1,12 @@
 package solvers.MetaheuristicSearch.GeneticAlgorithm;
 
-import common.ClausesSet;
 import common.Solution;
-import enums.StoppingCriteria;
-import gui.ClausesPanel;
 import gui.LaunchPanel;
+import gui.ClausesPanel;
+import common.ClausesSet;
 import gui.SolutionPanel;
+import solvers.BaseSolver;
+import enums.StoppingCriteria;
 import tasks.GeneticAlgorithmTask;
 
 import java.util.ArrayList;
@@ -13,21 +14,13 @@ import java.util.Collections;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class GeneticAlgorithm {
-
-    private ClausesSet clausesSet;
-
-    private final ClausesPanel clausesPanel;
-    private final SolutionPanel solutionPanel;
-    private final LaunchPanel launchPanel;
+public class GeneticAlgorithm extends BaseSolver {
 
     private final int populationSize;
     private final int maxIterations;
     private final int crossoverRate;
     private final int mutationRate;
     private final StoppingCriteria stoppingCriteria;
-    private final int executionTimeInSeconds;
-    private final GeneticAlgorithmTask task;
 
     private ArrayList<Individual> population;
     private Individual firstParent, secondParent, firstChild, secondChild, bestIndividual;
@@ -36,48 +29,36 @@ public class GeneticAlgorithm {
     private final Random random = new Random();
 
     public GeneticAlgorithm(
-        ClausesSet clausesSet,
-        ClausesPanel clausesPanel,
-        SolutionPanel solutionPanel,
         LaunchPanel launchPanel,
-
         int populationSize,
         int maxIterations,
         int crossoverRate,
         int mutationRate,
         StoppingCriteria stoppingCriteria,
         int executionTimeInSeconds,
-
         GeneticAlgorithmTask task
     ) {
-        this.clausesSet = clausesSet;
-        this.clausesPanel = clausesPanel;
-        this.solutionPanel = solutionPanel;
-        this.launchPanel = launchPanel;
-
+        super(launchPanel, executionTimeInSeconds, task);
         this.populationSize = populationSize;
         this.maxIterations = maxIterations;
         this.crossoverRate = crossoverRate;
         this.mutationRate = mutationRate;
         this.stoppingCriteria = stoppingCriteria;
-        this.executionTimeInSeconds = executionTimeInSeconds;
-        this.task = task;
     }
 
     public Solution process() {
 
-        population = generatePopulation(clausesSet, populationSize);
+        population = generatePopulation(getClausesSet(), populationSize);
 
         population.sort(Collections.reverseOrder());
         bestIndividual = population.get(0);
 
-        long startTime = System.currentTimeMillis();
+        startTimer();
 
         do {
             iteration++;
 
-            if (((((System.currentTimeMillis() - startTime)/1000) >= executionTimeInSeconds) && stoppingCriteria == StoppingCriteria.EXECUTION_TIME) || (task != null && (task.isCancelled() || task.isDone())))
-                break;
+            if (maxProcessingTimeIsReached()) break;
 
             /**
              * Selection
@@ -113,11 +94,9 @@ public class GeneticAlgorithm {
              */
             fitnessBasedInsertion();
 
-            if (launchPanel != null) launchPanel.getSummaryPanel().updateSummary(clausesSet, bestIndividual.getSolution());
-            if (solutionPanel != null) solutionPanel.setSolution(bestIndividual.getSolution());
+            updateUI(bestIndividual.getSolution());
 
-            boolean response = bestIndividual.getSolution().isTargetReached(clausesSet, clausesPanel != null ? clausesPanel.getTableModel() : null);
-            if (response) break;
+            if (targetIsReached(bestIndividual.getSolution())) break;
 
             // System.out.println(bestIndividual.getFitness());
         } while (stoppingCriteria(stoppingCriteria));
@@ -133,7 +112,7 @@ public class GeneticAlgorithm {
             case MAX_GENERATION:
                 return iteration < maxIterations;
             case MAX_FITNESS:
-                return bestIndividual.getFitness() < clausesSet.getNumberOfClause();
+                return bestIndividual.getFitness() < getClausesSet().getNumberOfClause();
             default:
                 throw new IllegalArgumentException();
         }
@@ -210,12 +189,12 @@ public class GeneticAlgorithm {
     }
 
     public int rateAsValue(int rate) {
-        return (Math.round((float) (rate*clausesSet.getNumberOfVariables())/100));
+        return (Math.round((float) (rate*getClausesSet().getNumberOfVariables())/100));
     }
 
     public void onePointCrossover() {
 
-        int numberOfVariables = clausesSet.getNumberOfVariables();
+        int numberOfVariables = getClausesSet().getNumberOfVariables();
 
         Solution firstChildSolution = new Solution(numberOfVariables);
         Solution secondChildSolution = new Solution(numberOfVariables);
@@ -230,8 +209,8 @@ public class GeneticAlgorithm {
             secondChildSolution.changeLiteral(i, firstParent.getSolution().getLiteral(i));
         }
 
-        firstChild = new Individual(clausesSet, firstChildSolution);
-        secondChild = new Individual(clausesSet, secondChildSolution);
+        firstChild = new Individual(getClausesSet(), firstChildSolution);
+        secondChild = new Individual(getClausesSet(), secondChildSolution);
     }
 
     public void bitFlipMutation() {
@@ -241,8 +220,8 @@ public class GeneticAlgorithm {
             .distinct()
             .limit(rateAsValue(mutationRate))
             .forEach(i -> {
-                firstChild.mutate(clausesSet, i);
-                secondChild.mutate(clausesSet, i);
+                firstChild.mutate(getClausesSet(), i);
+                secondChild.mutate(getClausesSet(), i);
             });
     }
 
@@ -268,18 +247,4 @@ public class GeneticAlgorithm {
         population.set(0, firstChild);
         population.set(1, secondChild);
     }
-
-    /*public static void main(String[] args) {
-
-        String file = "/Users/ilyes/Code/master/s3/bio-inspired/project/target/classes/uf75-325/uf75-01.cnf";
-
-        ClausesSet clausesSet = new ClausesSet(file);
-
-        GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm(clausesSet, 50, 100, 50, 5, 10, 1);
-
-        Instant start = Instant.now();
-        geneticAlgorithm.process();
-        Instant finish = Instant.now();
-        System.out.println((float) Duration.between(start, finish).toMillis() / 1000);
-    }*/
 }

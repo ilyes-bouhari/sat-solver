@@ -3,62 +3,46 @@ package solvers.HeuristicSearch;
 import java.util.*;
 
 import common.Clause;
-import common.ClausesSet;
 import common.Solution;
-import gui.ClausesPanel;
 import gui.LaunchPanel;
-import gui.SolutionPanel;
 import tasks.AStarTask;
+import common.ClausesSet;
+import solvers.BaseSolver;
 
-public class HeuristicSearch {
+public class HeuristicSearch extends BaseSolver {
 
-    private final ClausesSet clausesSet;
-    private final ClausesPanel clausesPanel;
-    private final int executionTimeInSeconds;
-    private final LaunchPanel launchPanel;
-    private final SolutionPanel solutionPanel;
-    private final AStarTask task;
-
-    public HeuristicSearch(ClausesSet clausesSet, ClausesPanel clausesPanel, SolutionPanel solutionPanel, int executionTimeInSeconds, LaunchPanel launchPanel, AStarTask task) {
-        this.clausesSet = clausesSet;
-        this.clausesPanel = clausesPanel;
-        this.solutionPanel = solutionPanel;
-        this.executionTimeInSeconds = executionTimeInSeconds;
-        this.launchPanel = launchPanel;
-        this.task = task;
+    public HeuristicSearch(LaunchPanel launchPanel, int executionTimeInSeconds, AStarTask task) {
+        super(launchPanel, executionTimeInSeconds, task);
     }
 
     public Solution AStar() {
 
-        ArrayList<Node> nodes = generateNodes(clausesSet);
+        ArrayList<Node> nodes = generateNodes(getClausesSet());
         nodes.sort(Collections.reverseOrder());
 
         ArrayList<Node> open = new ArrayList<>(nodes);
         ArrayList<Node> closed = new ArrayList<>();
 
-        Solution solution = new Solution(clausesSet.getNumberOfVariables());
+        Solution solution = new Solution(getClausesSet().getNumberOfVariables());
         Solution bestSolution = new Solution(solution);
 
-        long startTime = System.currentTimeMillis();
+        startTimer();
 
         while (!open.isEmpty()) {
 
-            if (((System.currentTimeMillis() - startTime)/1000) >= executionTimeInSeconds || (task != null && (task.isCancelled() || task.isDone())))
-                break;
+            if (maxProcessingTimeIsReached()) break;
 
             Node currentNode = open.remove(0);
             closed.add(currentNode);
 
             solution.update(reconstructPath(currentNode));
 
-            if(solution.countSatisfiedClauses(clausesSet, null) > bestSolution.countSatisfiedClauses(clausesSet, null))
+            if(solution.countSatisfiedClauses(getClausesSet(), null) > bestSolution.countSatisfiedClauses(getClausesSet(), null))
                 bestSolution = new Solution(solution);
 
-            if (launchPanel != null) launchPanel.getSummaryPanel().updateSummary(clausesSet, bestSolution);
-            if (solutionPanel != null) solutionPanel.setSolution(bestSolution);
+            updateUI(bestSolution);
 
-            boolean response = bestSolution.isTargetReached(clausesSet, clausesPanel != null ? clausesPanel.getTableModel() : null);
-            if (response) break;
+            if (targetIsReached(bestSolution)) break;
 
             if (currentNode.getChildren().size() > 0) {
 
@@ -71,7 +55,7 @@ public class HeuristicSearch {
                         0
                     );
 
-                    newNode.setCost(calculateCost(clausesSet, reconstructPath(newNode)));
+                    newNode.setCost(calculateCost(getClausesSet(), reconstructPath(newNode)));
                     newNode.setChildren(currentNode.getChildren());
 
                     open.add(newNode);

@@ -2,59 +2,46 @@ package solvers.BlindSearch;
 
 import common.Solution;
 import gui.LaunchPanel;
-import gui.ClausesPanel;
 import common.ClausesSet;
-import gui.SolutionPanel;
+import solvers.BaseSolver;
 import tasks.DepthFirstSearchTask;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class BlindSearch {
+public class BlindSearch extends BaseSolver {
 
-    private final ClausesSet clausesSet;
-    private final ClausesPanel clausesPanel;
-    private final SolutionPanel solutionPanel;
-    private final int executionTimeInSeconds;
-    private final LaunchPanel launchPanel;
-    private final DepthFirstSearchTask task;
     private Solution solution = null;
     private Solution bestSolution = null;
     private Node currentNode = null;
-    private ArrayList<Node> treeBranch;
 
-    public BlindSearch(ClausesSet clausesSet, ClausesPanel clausesPanel, SolutionPanel solutionPanel, int executionTimeInSeconds, LaunchPanel launchPanel, DepthFirstSearchTask task) {
-        this.clausesSet = clausesSet;
-        this.clausesPanel = clausesPanel;
-        this.solutionPanel = solutionPanel;
-        this.executionTimeInSeconds = executionTimeInSeconds;
-        this.launchPanel = launchPanel;
-        this.task = task;
+    public BlindSearch(LaunchPanel launchPanel, int executionTimeInSeconds, DepthFirstSearchTask task) {
+        super(launchPanel, executionTimeInSeconds, task);
     }
 
     public Solution DepthFirstSearch() {
 
-        int numberOfVariables = clausesSet.getNumberOfVariables();
+        int numberOfVariables = getClausesSet().getNumberOfVariables();
         solution = new Solution(numberOfVariables);
         bestSolution = new Solution(numberOfVariables);
-        treeBranch = new ArrayList<>(IntStream.rangeClosed(1, numberOfVariables).mapToObj(Node::new).collect(Collectors.toList()));
+        ArrayList<Node> treeBranch = IntStream.rangeClosed(1, numberOfVariables).mapToObj(Node::new).collect(Collectors.toCollection(ArrayList::new));
 
-        long startTime = System.currentTimeMillis();
+        startTimer();
+
         int level = 1;
         do {
 
-            if (((System.currentTimeMillis() - startTime)/1000) >= executionTimeInSeconds || (task != null && (task.isCancelled() || task.isDone())))
-                break;
-            
+            if (maxProcessingTimeIsReached()) break;
+
             int temp = level;
 
             currentNode = treeBranch.get(level-1);
-            if ((level <= clausesSet.getNumberOfVariables()) && currentNode.left == 0) {
+            if ((level <= getClausesSet().getNumberOfVariables()) && currentNode.left == 0) {
                 currentNode.setLeft();
                 updateThenVerifySolution(level-1);
                 ++temp;
-            } else if ((level <= clausesSet.getNumberOfVariables()) && currentNode.right == 0) {
+            } else if ((level <= getClausesSet().getNumberOfVariables()) && currentNode.right == 0) {
                 currentNode.setRight();
                 updateThenVerifySolution(level-1);
                 ++temp;
@@ -64,15 +51,13 @@ public class BlindSearch {
                 currentNode.reset();
             }
 
-            if (leafReached(clausesSet, temp)) {
+            if (leafReached(getClausesSet(), temp)) {
                 --temp;
             }
 
-            if (launchPanel != null) launchPanel.getSummaryPanel().updateSummary(clausesSet, bestSolution);
-            if (solutionPanel != null) solutionPanel.setSolution(bestSolution);
+            updateUI(bestSolution);
 
-            boolean response = bestSolution.isTargetReached(clausesSet, clausesPanel != null ? clausesPanel.getTableModel() : null);
-            if (response) break;
+            if (targetIsReached(bestSolution)) break;
 
             level = temp;
         } while (level > 0);
@@ -82,7 +67,7 @@ public class BlindSearch {
 
     public void updateThenVerifySolution(int index) {
         solution.changeLiteral(index, currentNode.getValue());
-        if(solution.countSatisfiedClauses(clausesSet, null) > bestSolution.countSatisfiedClauses(clausesSet, null))
+        if(solution.countSatisfiedClauses(getClausesSet(), null) > bestSolution.countSatisfiedClauses(getClausesSet(), null))
             bestSolution = new Solution(solution);
     }
 

@@ -1,12 +1,12 @@
 package gui.ParamsPanels;
 
-import enums.StoppingCriteria;
-import gui.LaunchPanel;
 import utils.ComboBoxItem;
+import enums.StoppingCriteria;
 import utils.ItemComboBoxRenderer;
 
 import java.awt.*;
 import javax.swing.*;
+import lombok.Getter;
 import javax.swing.border.Border;
 import java.util.stream.IntStream;
 import javax.swing.event.ChangeEvent;
@@ -14,6 +14,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.CompoundBorder;
 import javax.swing.event.ChangeListener;
 
+@Getter
 public class GA_Params extends JPanel {
 
     private JSpinner populationSizeSpinner;
@@ -21,8 +22,11 @@ public class GA_Params extends JPanel {
     private JComboBox crossoverRateComboBox;
     private JComboBox mutationRateComboBox;
     private ButtonGroup stoppingCriteriaButtonGroup;
+    private JRadioButton executionTimeRadioButton;
+    private JRadioButton maxFitnessRadioButton;
+    private JRadioButton maxGenerationsRadioButton;
 
-    public GA_Params(LaunchPanel launchPanel) {
+    public GA_Params() {
         setupUI();
         setupListeners();
     }
@@ -133,7 +137,7 @@ public class GA_Params extends JPanel {
         stoppingCriteriaButtonGroup = new ButtonGroup();
 
         gridBagConstraints = new GridBagConstraints();
-        JRadioButton executionTimeRadioButton = new JRadioButton("Execution Time");
+        executionTimeRadioButton  = new JRadioButton("Execution Time");
         executionTimeRadioButton.setActionCommand(String.valueOf(StoppingCriteria.EXECUTION_TIME));
         stoppingCriteriaButtonGroup.add(executionTimeRadioButton);
         gridBagConstraints.fill = GridBagConstraints.BOTH;
@@ -144,7 +148,7 @@ public class GA_Params extends JPanel {
         executionTimeRadioButton.setSelected(true);
 
         gridBagConstraints = new GridBagConstraints();
-        JRadioButton maxFitnessRadioButton = new JRadioButton("Max fitness");
+        maxFitnessRadioButton  = new JRadioButton("Max fitness");
         maxFitnessRadioButton.setActionCommand(String.valueOf(StoppingCriteria.MAX_FITNESS));
         stoppingCriteriaButtonGroup.add(maxFitnessRadioButton);
         gridBagConstraints.fill = GridBagConstraints.BOTH;
@@ -154,7 +158,7 @@ public class GA_Params extends JPanel {
         stoppingCriteriaPanel.add(maxFitnessRadioButton, gridBagConstraints);
 
         gridBagConstraints = new GridBagConstraints();
-        JRadioButton maxGenerationsRadioButton = new JRadioButton("Max generations (iterations)");
+        maxGenerationsRadioButton  = new JRadioButton("Max generations (iterations)");
         maxGenerationsRadioButton.setActionCommand(String.valueOf(StoppingCriteria.MAX_GENERATION));
         stoppingCriteriaButtonGroup.add(maxGenerationsRadioButton);
         gridBagConstraints.fill = GridBagConstraints.BOTH;
@@ -187,25 +191,5 @@ public class GA_Params extends JPanel {
         maxIterationSpinner.setValue(100);
         crossoverRateComboBox.setSelectedIndex(49);
         mutationRateComboBox.setSelectedIndex(4);
-    }
-
-    public JSpinner getPopulationSizeSpinner() {
-        return populationSizeSpinner;
-    }
-
-    public JSpinner getMaxIterationSpinner() {
-        return maxIterationSpinner;
-    }
-
-    public JComboBox getCrossoverRateComboBox() {
-        return crossoverRateComboBox;
-    }
-
-    public JComboBox getMutationRateComboBox() {
-        return mutationRateComboBox;
-    }
-
-    public ButtonGroup getStoppingCriteriaButtonGroup() {
-        return stoppingCriteriaButtonGroup;
     }
 }
