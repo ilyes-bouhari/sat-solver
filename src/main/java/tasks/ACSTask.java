@@ -6,7 +6,8 @@ import lombok.AllArgsConstructor;
 import gui.LaunchPanel;
 import common.Solution;
 import solvers.HeuristicSearch.HeuristicSearch;
-import solvers.MetaheuristicSearch.AntColonySystem.ACS;
+import solvers.MetaheuristicSearch.AntColonySystem.AntColonySystem;
+import solvers.MetaheuristicSearch.MetaheuristicSearch;
 
 @AllArgsConstructor
 public class ACSTask extends SwingWorker<Object, Void> {
@@ -21,18 +22,19 @@ public class ACSTask extends SwingWorker<Object, Void> {
     private final double evaporationRate;
     private final double q0;
     private final int maxStep;
-    private final int executionTimeInSeconds;
 
     @Override
     protected Object doInBackground() {
 
+        double executionTimeInSeconds = launchPanel.getExecutionTimeInSeconds();
+        launchPanel.setExecutionTimeInSeconds(1);
         Solution baseSolution = (new HeuristicSearch(
             launchPanel,
-            1,
             null
         )).AStar();
 
-        return (new ACS(
+        launchPanel.setExecutionTimeInSeconds(executionTimeInSeconds);
+        (new MetaheuristicSearch()).AntColonySystem(
             launchPanel,
             baseSolution,
             alpha,
@@ -43,9 +45,10 @@ public class ACSTask extends SwingWorker<Object, Void> {
             evaporationRate,
             q0,
             maxStep,
-            executionTimeInSeconds,
             this
-        ).run());
+        ).run();
+
+        return null;
     }
 
     @Override

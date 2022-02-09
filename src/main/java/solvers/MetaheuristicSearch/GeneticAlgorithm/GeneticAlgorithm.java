@@ -35,10 +35,9 @@ public class GeneticAlgorithm extends BaseSolver {
         int crossoverRate,
         int mutationRate,
         StoppingCriteria stoppingCriteria,
-        int executionTimeInSeconds,
         GeneticAlgorithmTask task
     ) {
-        super(launchPanel, executionTimeInSeconds, task);
+        super(launchPanel, task);
         this.populationSize = populationSize;
         this.maxIterations = maxIterations;
         this.crossoverRate = crossoverRate;

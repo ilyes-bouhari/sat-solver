@@ -1,12 +1,11 @@
 package solvers.MetaheuristicSearch;
 
-import common.ClausesSet;
 import common.Solution;
 import enums.StoppingCriteria;
-import gui.ClausesPanel;
 import gui.LaunchPanel;
-import gui.SolutionPanel;
+import solvers.MetaheuristicSearch.AntColonySystem.AntColonySystem;
 import solvers.MetaheuristicSearch.GeneticAlgorithm.GeneticAlgorithm;
+import tasks.ACSTask;
 import tasks.GeneticAlgorithmTask;
 
 public class MetaheuristicSearch {
@@ -18,8 +17,6 @@ public class MetaheuristicSearch {
         int crossoverRate,
         int mutationRate,
         StoppingCriteria stoppingCriteria,
-        int executionTimeInSeconds,
-
         GeneticAlgorithmTask task
     ) {
         return new GeneticAlgorithm(
@@ -29,7 +26,34 @@ public class MetaheuristicSearch {
             crossoverRate,
             mutationRate,
             stoppingCriteria,
-            executionTimeInSeconds,
+            task
+        );
+    }
+
+    public AntColonySystem AntColonySystem(
+        LaunchPanel launchPanel,
+        Solution baseSolution,
+        double alpha,
+        double beta,
+        int maxIterations,
+        int numberOfAnts,
+        double pheromoneInit,
+        double evaporationRate,
+        double q0,
+        int maxStep,
+        ACSTask task
+    ) {
+        return new AntColonySystem(
+            launchPanel,
+            baseSolution,
+            alpha,
+            beta,
+            maxIterations,
+            numberOfAnts,
+            pheromoneInit,
+            evaporationRate,
+            q0,
+            maxStep,
             task
         );
     }

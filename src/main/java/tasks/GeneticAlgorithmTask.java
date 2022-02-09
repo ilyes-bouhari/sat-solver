@@ -16,7 +16,6 @@ public class GeneticAlgorithmTask extends SwingWorker<Object, Void> {
     private final int crossoverRate;
     private final int mutationRate;
     private final StoppingCriteria stoppingCriteria;
-    private final int executionTimeInSeconds;
 
     @Override
     protected Object doInBackground() throws Exception {
@@ -28,7 +27,6 @@ public class GeneticAlgorithmTask extends SwingWorker<Object, Void> {
             crossoverRate,
             mutationRate,
             stoppingCriteria,
-            executionTimeInSeconds,
             this
         ).process();
 

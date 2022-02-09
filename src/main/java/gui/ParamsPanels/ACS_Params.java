@@ -113,7 +113,9 @@ public class ACS_Params extends JPanel {
         add(pheromoneInitLabel, gridBagConstraints);
 
         gridBagConstraints = new GridBagConstraints();
-        pheromoneInitSpinner = new JSpinner(new SpinnerNumberModel(0.1, 0.01, 1, 0.01));
+        pheromoneInitSpinner = new JSpinner(new SpinnerNumberModel(0.01, 0.00001, 1, 0.01));
+        JSpinner.NumberEditor numberEditor = new JSpinner.NumberEditor(pheromoneInitSpinner,"0.00000");
+        pheromoneInitSpinner.setEditor(numberEditor);
         gridBagConstraints.fill = GridBagConstraints.BOTH;
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = 4;

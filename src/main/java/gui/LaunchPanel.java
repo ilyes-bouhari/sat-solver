@@ -2,7 +2,6 @@ package gui;
 
 import java.awt.*;
 import javax.swing.*;
-import common.ClausesSet;
 import enums.Solvers;
 import enums.StoppingCriteria;
 import gui.ParamsPanels.ACS_Params;
@@ -41,7 +40,7 @@ public class LaunchPanel extends JPanel {
 
     @Setter(AccessLevel.NONE)
     private SwingWorker<Object, Void> task;
-    private int executionTimeInSeconds;
+    private double executionTimeInSeconds;
 
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
@@ -123,23 +122,20 @@ public class LaunchPanel extends JPanel {
                     toggleOnRunning(true);
 
                     Solvers solver = getChosenSolver();
-                    setExecutionTimeInSeconds(getChosenExecutionTime());
-                    ClausesSet clausesSet = clausesPanel.getClausesSet();
+                    launchPanel.setExecutionTimeInSeconds(getChosenExecutionTime());
 
                     switch (solver) {
                         case DFS: {
 
                             (task = new DepthFirstSearchTask(
-                                launchPanel,
-                                executionTimeInSeconds
+                                launchPanel
                             )).execute();
                             break;
                         }
                         case AStar: {
 
                             (task = new AStarTask(
-                                launchPanel,
-                                executionTimeInSeconds
+                                launchPanel
                             )).execute();
                             break;
                         }
@@ -157,8 +153,7 @@ public class LaunchPanel extends JPanel {
                                 maxIteration,
                                 crossoverRate,
                                 mutationRate,
-                                stoppingCriteria,
-                                executionTimeInSeconds
+                                stoppingCriteria
                             )).execute();
                             break;
                         }
@@ -183,8 +178,7 @@ public class LaunchPanel extends JPanel {
                                 pheromoneInit,
                                 evaporationRate,
                                 q0,
-                                maxStep,
-                                executionTimeInSeconds
+                                maxStep
                             )).execute();
                             break;
                         }

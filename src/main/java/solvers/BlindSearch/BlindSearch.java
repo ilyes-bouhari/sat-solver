@@ -16,8 +16,8 @@ public class BlindSearch extends BaseSolver {
     private Solution bestSolution = null;
     private Node currentNode = null;
 
-    public BlindSearch(LaunchPanel launchPanel, int executionTimeInSeconds, DepthFirstSearchTask task) {
-        super(launchPanel, executionTimeInSeconds, task);
+    public BlindSearch(LaunchPanel launchPanel, DepthFirstSearchTask task) {
+        super(launchPanel, task);
     }
 
     public Solution DepthFirstSearch() {

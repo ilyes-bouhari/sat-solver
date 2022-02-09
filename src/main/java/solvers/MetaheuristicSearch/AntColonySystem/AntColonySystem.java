@@ -11,7 +11,7 @@ import solvers.BaseSolver;
 import command.GenerateResults;
 import solvers.HeuristicSearch.HeuristicSearch;
 
-public class ACS extends BaseSolver {
+public class AntColonySystem extends BaseSolver {
 
     private final common.Solution baseSolution;
 
@@ -28,7 +28,7 @@ public class ACS extends BaseSolver {
     private final HashMap<Integer, Literal> literals = new HashMap<>();
     private final HashMap<Integer, Double> pheromone = new HashMap<>();
 
-    public ACS(
+    public AntColonySystem(
         LaunchPanel launchPanel,
         common.Solution baseSolution,
         double alpha,
@@ -39,10 +39,9 @@ public class ACS extends BaseSolver {
         double evaporationRate,
         double q0,
         int maxStep,
-        int executionTimeInSeconds,
         ACSTask task
     ) {
-        super(launchPanel, executionTimeInSeconds, task);
+        super(launchPanel, task);
         this.baseSolution = baseSolution;
         this.alpha = alpha;
         this.beta = beta;
@@ -273,19 +272,19 @@ public class ACS extends BaseSolver {
 
         LaunchPanel launchPanel = new LaunchPanel();
         launchPanel.setClausesPanel(clausesPanel);
+        launchPanel.setExecutionTimeInSeconds(1);
 
         common.Solution solution = (new HeuristicSearch(
             launchPanel,
-            1,
             null
         )).AStar();
 
         System.out.println("A* : " + solution.countSatisfiedClauses(clausesPanel.getClausesSet(), null));
         System.out.println("A* : " + solution);
 
-        launchPanel.setExecutionTimeInSeconds(60);
+        launchPanel.setExecutionTimeInSeconds(120);
 
-        ACS acs = new ACS(launchPanel, solution, .1, .1 , 2000, 10, .1,.3, .7, 60, 10, null);
+        AntColonySystem acs = new AntColonySystem(launchPanel, solution, .1, .1 , 2000, 10, .1,.1, .7, 60,  null);
 
         solution = acs.run();
         System.out.println("ACS : " + solution);

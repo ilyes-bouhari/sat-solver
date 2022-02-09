@@ -7,12 +7,10 @@ import javax.swing.*;
 
 public class DepthFirstSearchTask extends SwingWorker<Object, Void> {
 
-    private int executionTimeInSeconds;
     private LaunchPanel launchPanel;
 
-    public DepthFirstSearchTask(LaunchPanel launchPanel, int executionTimeInSeconds) {
+    public DepthFirstSearchTask(LaunchPanel launchPanel) {
         this.launchPanel = launchPanel;
-        this.executionTimeInSeconds = executionTimeInSeconds;
     }
 
     @Override
@@ -20,7 +18,6 @@ public class DepthFirstSearchTask extends SwingWorker<Object, Void> {
 
         (new BlindSearch(
             launchPanel,
-            executionTimeInSeconds,
             this
         )).DepthFirstSearch();
 

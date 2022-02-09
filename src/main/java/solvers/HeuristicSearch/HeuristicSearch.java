@@ -11,8 +11,8 @@ import solvers.BaseSolver;
 
 public class HeuristicSearch extends BaseSolver {
 
-    public HeuristicSearch(LaunchPanel launchPanel, int executionTimeInSeconds, AStarTask task) {
-        super(launchPanel, executionTimeInSeconds, task);
+    public HeuristicSearch(LaunchPanel launchPanel, AStarTask task) {
+        super(launchPanel, task);
     }
 
     public Solution AStar() {

@@ -18,12 +18,11 @@ public class BaseSolver {
 
     private Instant start;
 
-    public BaseSolver(LaunchPanel launchPanel, int executionTimeInSeconds, SwingWorker<Object, Void> task) {
+    public BaseSolver(LaunchPanel launchPanel, SwingWorker<Object, Void> task) {
         this.launchPanel = launchPanel;
         this.task = task;
 
         this.clausesSet = launchPanel.getClausesPanel().getClausesSet();
-        launchPanel.setExecutionTimeInSeconds(executionTimeInSeconds);
     }
 
     public void startTimer() {
@@ -44,8 +43,8 @@ public class BaseSolver {
         if (task != null) launchPanel.getSolutionPanel().setSolution(bestSolution);
     }
 
-    public float getExecutedTimeUntilNow() {
-        return (float) Duration.between(start, Instant.now()).toMillis() / 1000;
+    public double getExecutedTimeUntilNow() {
+        return (double) Duration.between(start, Instant.now()).toMillis() / 1000;
     }
 
     public String getExecutedTimeUntilNowAsString() {
